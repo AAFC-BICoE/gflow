@@ -10,7 +10,7 @@ from setuptools import setup
 
 version = re.search(
     '^__version__\s*=\s*"(.*)"',
-    open('bootstrap/bootstrap.py').read(),
+    open('gflow/gflow.py').read(),
     re.M
     ).group(1)
 
@@ -20,15 +20,15 @@ with open("README.rst", "rb") as f:
 
 
 setup(
-    name = "cmdline-bootstrap",
-    packages = ["bootstrap"],
+    name = "gflow",
+    packages = ["gflow"],
     entry_points = {
-        "console_scripts": ['bootstrap = bootstrap.bootstrap:main']
+        "console_scripts": ['gflow = gflow.gflow:main']
         },
     version = version,
-    description = "Python command line application bare bones template.",
+    description = "Command line tool for running Galaxy workflows.",
     long_description = long_descr,
-    author = "Jan-Philip Gehrcke",
-    author_email = "jgehrcke@googlemail.com",
-    url = "http://gehrcke.de/2014/02/distributing-a-python-command-line-application",
+    author = "Alex MacLean",
+    author_email = "maclean199@gmail.com",
+    url = "https://github.com/AAFC-MBB/gflow",
     )

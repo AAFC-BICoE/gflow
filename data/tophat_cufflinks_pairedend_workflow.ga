@@ -1,0 +1,222 @@
+{
+    "a_galaxy_workflow": "true", 
+    "annotation": "", 
+    "format-version": "0.1", 
+    "name": "Workflow constructed from history 'Galaxy 101'", 
+    "steps": {
+        "0": {
+            "annotation": "", 
+            "id": 0, 
+            "input_connections": {}, 
+            "inputs": [
+                {
+                    "description": "", 
+                    "name": "Input Dataset"
+                }
+            ], 
+            "label": null, 
+            "name": "Input dataset", 
+            "outputs": [], 
+            "position": {
+                "left": 10, 
+                "top": 10
+            }, 
+            "tool_errors": null, 
+            "tool_id": null, 
+            "tool_state": "{\"name\": \"Input Dataset\"}", 
+            "tool_version": null, 
+            "type": "data_input", 
+            "user_outputs": [], 
+            "uuid": "0149bb75-3b79-4aed-b3b8-0d8f0c86d049"
+        }, 
+        "1": {
+            "annotation": "", 
+            "id": 1, 
+            "input_connections": {}, 
+            "inputs": [
+                {
+                    "description": "", 
+                    "name": "Input Dataset"
+                }
+            ], 
+            "label": null, 
+            "name": "Input dataset", 
+            "outputs": [], 
+            "position": {
+                "left": 10, 
+                "top": 130
+            }, 
+            "tool_errors": null, 
+            "tool_id": null, 
+            "tool_state": "{\"name\": \"Input Dataset\"}", 
+            "tool_version": null, 
+            "type": "data_input", 
+            "user_outputs": [], 
+            "uuid": "59cff8a4-e162-4216-ad3d-87ceccfd407f"
+        }, 
+        "2": {
+            "annotation": "", 
+            "id": 2, 
+            "input_connections": {
+                "input1": {
+                    "id": 0, 
+                    "output_name": "output"
+                }, 
+                "input2": {
+                    "id": 1, 
+                    "output_name": "output"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Join", 
+            "outputs": [
+                {
+                    "name": "output", 
+                    "type": "interval"
+                }
+            ], 
+            "position": {
+                "left": 230, 
+                "top": 10
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/devteam/join/gops_join_1/1.0.0", 
+            "tool_state": "{\"input2\": \"null\", \"__page__\": 0, \"input1\": \"null\", \"min\": \"\\\"1\\\"\", \"__rerun_remap_job_id__\": null, \"chromInfo\": \"\\\"/galaxy-repl/localdata/chrom/hg38.len\\\"\", \"fill\": \"\\\"none\\\"\"}", 
+            "tool_version": null, 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "5c78ad9f-9cbb-4373-a129-09a3ffb3554a"
+        }, 
+        "3": {
+            "annotation": "", 
+            "id": 3, 
+            "input_connections": {
+                "input1": {
+                    "id": 2, 
+                    "output_name": "output"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Group", 
+            "outputs": [
+                {
+                    "name": "out_file1", 
+                    "type": "tabular"
+                }
+            ], 
+            "position": {
+                "left": 450, 
+                "top": 10
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "Grouping1", 
+            "tool_state": "{\"operations\": \"[{\\\"opcol\\\": {\\\"__class__\\\": \\\"UnvalidatedValue\\\", \\\"value\\\": \\\"4\\\"}, \\\"__index__\\\": 0, \\\"optype\\\": \\\"length\\\", \\\"opround\\\": \\\"no\\\"}]\", \"__page__\": 0, \"input1\": \"null\", \"ignorelines\": \"null\", \"groupcol\": \"{\\\"__class__\\\": \\\"UnvalidatedValue\\\", \\\"value\\\": \\\"4\\\"}\", \"__rerun_remap_job_id__\": null, \"ignorecase\": \"\\\"False\\\"\", \"chromInfo\": \"\\\"/galaxy-repl/localdata/chrom/hg38.len\\\"\"}", 
+            "tool_version": null, 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "ffcb1430-dfc8-4c02-a17c-28bdbc999143"
+        }, 
+        "4": {
+            "annotation": "", 
+            "id": 4, 
+            "input_connections": {
+                "input": {
+                    "id": 3, 
+                    "output_name": "out_file1"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Sort", 
+            "outputs": [
+                {
+                    "name": "out_file1", 
+                    "type": "input"
+                }
+            ], 
+            "position": {
+                "left": 670, 
+                "top": 10
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "sort1", 
+            "tool_state": "{\"__page__\": 0, \"style\": \"\\\"num\\\"\", \"column\": \"{\\\"__class__\\\": \\\"UnvalidatedValue\\\", \\\"value\\\": \\\"2\\\"}\", \"__rerun_remap_job_id__\": null, \"column_set\": \"[]\", \"input\": \"null\", \"chromInfo\": \"\\\"/galaxy-repl/localdata/chrom/hg38.len\\\"\", \"order\": \"\\\"DESC\\\"\"}", 
+            "tool_version": null, 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "77df9bcd-efa9-41aa-922a-aeb409342b89"
+        }, 
+        "5": {
+            "annotation": "", 
+            "id": 5, 
+            "input_connections": {
+                "input": {
+                    "id": 4, 
+                    "output_name": "out_file1"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Select first", 
+            "outputs": [
+                {
+                    "name": "out_file1", 
+                    "type": "input"
+                }
+            ], 
+            "position": {
+                "left": 890, 
+                "top": 10
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "Show beginning1", 
+            "tool_state": "{\"__page__\": 0, \"input\": \"null\", \"__rerun_remap_job_id__\": null, \"chromInfo\": \"\\\"/galaxy-repl/localdata/chrom/hg38.len\\\"\", \"lineNum\": \"\\\"5\\\"\"}", 
+            "tool_version": null, 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "0bfd2264-4f00-4557-b0c2-8333cae9b09c"
+        }, 
+        "6": {
+            "annotation": "", 
+            "id": 6, 
+            "input_connections": {
+                "input1": {
+                    "id": 0, 
+                    "output_name": "output"
+                }, 
+                "input2": {
+                    "id": 5, 
+                    "output_name": "out_file1"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Compare two Datasets", 
+            "outputs": [
+                {
+                    "name": "out_file1", 
+                    "type": "input"
+                }
+            ], 
+            "position": {
+                "left": 1110, 
+                "top": 10
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "comp1", 
+            "tool_state": "{\"input2\": \"null\", \"__page__\": 0, \"input1\": \"null\", \"field2\": \"{\\\"__class__\\\": \\\"UnvalidatedValue\\\", \\\"value\\\": \\\"1\\\"}\", \"__rerun_remap_job_id__\": null, \"field1\": \"{\\\"__class__\\\": \\\"UnvalidatedValue\\\", \\\"value\\\": \\\"4\\\"}\", \"mode\": \"\\\"N\\\"\", \"chromInfo\": \"\\\"/galaxy-repl/localdata/chrom/hg38.len\\\"\"}", 
+            "tool_version": null, 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "eeeecfbc-2d92-4dd1-b36e-b089de479dc8"
+        }
+    }, 
+    "uuid": "976f5259-abd1-4a47-b2ac-193dabc33568"
+}

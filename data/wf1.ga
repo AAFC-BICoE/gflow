@@ -1,0 +1,230 @@
+{
+    "a_galaxy_workflow": "true", 
+    "annotation": "", 
+    "format-version": "0.1", 
+    "name": "testflow", 
+    "steps": {
+        "0": {
+            "annotation": "", 
+            "id": 0, 
+            "input_connections": {}, 
+            "inputs": [
+                {
+                    "description": "", 
+                    "name": "Exons"
+                }
+            ], 
+            "label": null, 
+            "name": "Input dataset", 
+            "outputs": [], 
+            "position": {
+                "left": 207, 
+                "top": 286
+            }, 
+            "tool_errors": null, 
+            "tool_id": null, 
+            "tool_state": "{\"name\": \"Exons\"}", 
+            "tool_version": null, 
+            "type": "data_input", 
+            "user_outputs": [], 
+            "uuid": "a26fef19-79b8-4230-a746-3e1184e7c003"
+        }, 
+        "1": {
+            "annotation": "", 
+            "id": 1, 
+            "input_connections": {}, 
+            "inputs": [
+                {
+                    "description": "", 
+                    "name": "Features"
+                }
+            ], 
+            "label": null, 
+            "name": "Input dataset", 
+            "outputs": [], 
+            "position": {
+                "left": 206, 
+                "top": 404
+            }, 
+            "tool_errors": null, 
+            "tool_id": null, 
+            "tool_state": "{\"name\": \"Features\"}", 
+            "tool_version": null, 
+            "type": "data_input", 
+            "user_outputs": [], 
+            "uuid": "d5feb4a6-b58e-4d08-a9e3-d71fe9c98bb2"
+        }, 
+        "2": {
+            "annotation": "", 
+            "id": 2, 
+            "input_connections": {
+                "input1": {
+                    "id": 0, 
+                    "output_name": "output"
+                }, 
+                "input2": {
+                    "id": 1, 
+                    "output_name": "output"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Join", 
+            "outputs": [
+                {
+                    "name": "output", 
+                    "type": "interval"
+                }
+            ], 
+            "position": {
+                "left": 420, 
+                "top": 280
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "toolshed.g2.bx.psu.edu/repos/devteam/join/gops_join_1/0.0.1", 
+            "tool_state": "{\"input2\": \"null\", \"__page__\": 0, \"input1\": \"null\", \"min\": \"\\\"1\\\"\", \"__rerun_remap_job_id__\": null, \"chromInfo\": \"\\\"/mnt/galaxy/galaxy-app/tool-data/len/hg38.len\\\"\", \"fill\": \"\\\"none\\\"\"}", 
+            "tool_version": "0.0.1", 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "0880c0a0-6574-4a00-8b72-8cdfeb2ece95"
+        }, 
+        "3": {
+            "annotation": "", 
+            "id": 3, 
+            "input_connections": {
+                "input1": {
+                    "id": 2, 
+                    "output_name": "output"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Group", 
+            "outputs": [
+                {
+                    "name": "out_file1", 
+                    "type": "tabular"
+                }
+            ], 
+            "position": {
+                "left": 640, 
+                "top": 280
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "Grouping1", 
+            "tool_state": "{\"operations\": \"[{\\\"opcol\\\": {\\\"__class__\\\": \\\"UnvalidatedValue\\\", \\\"value\\\": \\\"4\\\"}, \\\"__index__\\\": 0, \\\"optype\\\": \\\"length\\\", \\\"opround\\\": \\\"no\\\"}]\", \"__page__\": 0, \"input1\": \"null\", \"ignorelines\": \"null\", \"groupcol\": \"{\\\"__class__\\\": \\\"UnvalidatedValue\\\", \\\"value\\\": \\\"4\\\"}\", \"__rerun_remap_job_id__\": null, \"ignorecase\": \"\\\"False\\\"\", \"chromInfo\": \"\\\"/mnt/galaxy/galaxy-app/tool-data/len/hg38.len\\\"\"}", 
+            "tool_version": "2.1.0", 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "f9758e68-817c-4083-bcce-d7dc9a16b3bb"
+        }, 
+        "4": {
+            "annotation": "", 
+            "id": 4, 
+            "input_connections": {
+                "input": {
+                    "id": 3, 
+                    "output_name": "out_file1"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Sort", 
+            "outputs": [
+                {
+                    "name": "out_file1", 
+                    "type": "input"
+                }
+            ], 
+            "position": {
+                "left": 860, 
+                "top": 280
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "sort1", 
+            "tool_state": "{\"__page__\": 0, \"style\": \"\\\"num\\\"\", \"column\": \"{\\\"__class__\\\": \\\"UnvalidatedValue\\\", \\\"value\\\": \\\"2\\\"}\", \"__rerun_remap_job_id__\": null, \"column_set\": \"[]\", \"input\": \"null\", \"chromInfo\": \"\\\"/mnt/galaxy/galaxy-app/tool-data/len/hg38.len\\\"\", \"order\": \"\\\"DESC\\\"\"}", 
+            "tool_version": "1.0.3", 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "7ad31935-5ed7-42ac-863b-d5100269d2e4"
+        }, 
+        "5": {
+            "annotation": "", 
+            "id": 5, 
+            "input_connections": {
+                "input": {
+                    "id": 4, 
+                    "output_name": "out_file1"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Select first", 
+            "outputs": [
+                {
+                    "name": "out_file1", 
+                    "type": "input"
+                }
+            ], 
+            "position": {
+                "left": 1080, 
+                "top": 280
+            }, 
+            "post_job_actions": {}, 
+            "tool_errors": null, 
+            "tool_id": "Show beginning1", 
+            "tool_state": "{\"__page__\": 0, \"input\": \"null\", \"__rerun_remap_job_id__\": null, \"chromInfo\": \"\\\"/mnt/galaxy/galaxy-app/tool-data/len/hg38.len\\\"\", \"lineNum\": \"\\\"5\\\"\"}", 
+            "tool_version": "1.0.0", 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "a7d4a949-76f9-4960-8a80-04d552f80704"
+        }, 
+        "6": {
+            "annotation": "", 
+            "id": 6, 
+            "input_connections": {
+                "input1": {
+                    "id": 0, 
+                    "output_name": "output"
+                }, 
+                "input2": {
+                    "id": 5, 
+                    "output_name": "out_file1"
+                }
+            }, 
+            "inputs": [], 
+            "label": null, 
+            "name": "Compare two Datasets", 
+            "outputs": [
+                {
+                    "name": "out_file1", 
+                    "type": "input"
+                }
+            ], 
+            "position": {
+                "left": 1311, 
+                "top": 288
+            }, 
+            "post_job_actions": {
+                "RenameDatasetActionout_file1": {
+                    "action_arguments": {
+                        "newname": "top 5 exons"
+                    }, 
+                    "action_type": "RenameDatasetAction", 
+                    "output_name": "out_file1"
+                }
+            }, 
+            "tool_errors": null, 
+            "tool_id": "comp1", 
+            "tool_state": "{\"input2\": \"null\", \"__page__\": 0, \"input1\": \"null\", \"field2\": \"\\\"\\\"\", \"__rerun_remap_job_id__\": null, \"field1\": \"\\\"\\\"\", \"mode\": \"\\\"N\\\"\"}", 
+            "tool_version": "1.0.2", 
+            "type": "tool", 
+            "user_outputs": [], 
+            "uuid": "a6aaad2d-7de2-47eb-b7ca-09bd5c4aa816"
+        }
+    }, 
+    "uuid": "1507bed3-1848-4da5-b272-030dbe8549c7"
+}
