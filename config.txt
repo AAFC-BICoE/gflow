@@ -12,8 +12,8 @@ library_name = Imported
 # local, server, url, or galaxyfs
 dataset_src = local
 num_datasets = 2
-data1 = data/data1.bed
-data2 = data/data2.tabular
+1 = data/data1.bed
+2 = data/data2.tabular
 
 [output]
 output_history_name = top 5 exons
