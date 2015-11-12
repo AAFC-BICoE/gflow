@@ -5,7 +5,7 @@
 """Convenience wrapper for running gflow directly from source tree."""
 
 
-from gflow.gflow import main
+from gflow.GFlow import main
 
 
 if __name__ == '__main__':

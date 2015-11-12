@@ -1,11 +1,68 @@
-from nose.tools import *
-import gflow
+import unittest
+from gflow.GFlow import *
+from nose.tools import raises
 
-def setup():
-    print "SETUP!"
+class TestInput(unittest.TestCase):
 
-def teardown():
-    print "TEAR DOWN!"
+    def setUp(self):
+        self.input = Input("local", "data/data1.bed", "Input Dataset")
 
-def test_basic():
-    print "I RAN!"
+    def test_source(self):
+        self.assertEqual("local", self.input.input_type)
+
+    def test_data(self):
+        self.assertEqual("data/data1.bed", self.input.name)
+
+    def test_label(self):
+        self.assertEqual("Input Dataset", self.input.label)
+
+class TestReadConfig(unittest.TestCase):
+
+    def test_proper_number_of_datasets(self):
+        configfile = "tests/configs/config0.txt"
+        options = read_config(configfile)
+        self.assertEqual(int(options['num_datasets']), len(options['datasets']))
+
+    def test_proper_number_of_labels(self):
+        configfile = "tests/configs/config0.txt"
+        options = read_config(configfile)
+        self.assertEqual(int(options['num_datasets']), len(options['labels']))
+
+    @raises(SystemExit)
+    def test_improper_number_of_datasets_or_labels(self):
+        configfile = "tests/configs/config1.txt"
+        read_config(configfile)
+
+    def test_proper_workflow_src(self):
+        configfile = "tests/configs/config0.txt"
+        options = read_config(configfile)
+        assert options['workflow_src'] in ['local', 'shared']
+
+    @raises(SystemExit)
+    def test_improper_workflow_src(self):
+        configfile = "tests/configs/config3.txt"
+        read_config(configfile)
+
+    def test_proper_dataset_src(self):
+        configfile = "tests/configs/config0.txt"
+        options = read_config(configfile)
+        assert options['dataset_src'] in ['local', 'url', 'galaxyfs']
+
+    @raises(SystemExit)
+    def test_improper_dataset_src(self):
+        configfile = "tests/configs/config2.txt"
+        read_config(configfile)
+
+class TestGFlow:
+
+    def setup(self):
+        configfile = "config.txt"
+        options = read_config(configfile)
+        self.gflow = GFlow(options)
+
+    def test_good_workflow(self):
+        assert self.gflow.run_workflow() == 0
+
+    def test_good_galaxy_connection(self):
+        gi = GalaxyInstance(self.gflow.galaxy_url, self.gflow.galaxy_key)
+        assert gi

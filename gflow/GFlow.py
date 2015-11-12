@@ -31,14 +31,25 @@ def read_config(configfile):
     options['galaxy_key'] = config.get('galaxy', 'galaxy_key')
     options['library_name'] = config.get('library', 'library_name')
     options['dataset_src'] = config.get('input', 'dataset_src')
+    if options['dataset_src'] not in ['local', 'url', 'galaxyfs']:
+        print >> sys.stderr, "ERROR: Accepted dataset sources are: local, url, or galaxyfs"
+        sys.exit(1)
     options['num_datasets'] = config.get('input', 'num_datasets')
     options['datasets'] = []
     options['labels'] = []
-    for i in range(0, int(options['num_datasets'])):
-        options['datasets'].append(config.get('input', "data" + str(i)))
-        options['labels'].append(config.get('input', "label" + str(i)))
+    try:
+        for i in range(0, int(options['num_datasets'])):
+            options['datasets'].append(config.get('input', "data" + str(i)))
+            options['labels'].append(config.get('input', "label" + str(i)))
+    except ConfigParser.NoOptionError as e:
+        print >> sys.stderr, "ERROR: The number of datasets or labels provided does not match the number required"
+        print >> sys.stderr, e
+        sys.exit(1)
     options['output_history_name'] = config.get('output', 'output_history_name')
     options['workflow_src'] = config.get('workflow', 'source')
+    if options['workflow_src'] not in ['local', 'shared']:
+        print >> sys.stderr, "ERROR: Accepted dataset sources are: local or shared"
+        sys.exit(1)
     options['workflow'] = config.get('workflow', 'workflow')
     return options
 
@@ -93,11 +104,8 @@ class GFlow(object):
         if self.workflow_src == 'local':
             workflow_json = json.load(open(self.workflow))
             wf = gi.workflows.import_new(workflow_json)
-        elif self.workflow_src == 'shared':
-            wf = gi.workflows.import_shared(self.workflow)
         else:
-            print >> sys.stderr, "ERROR: Accepted workflow sources are: local or shared"
-            sys.exit(1)
+            wf = gi.workflows.import_shared(self.workflow)
         return wf
 
     def collect_datasets(self, src, datasets, labels):
@@ -112,11 +120,9 @@ class GFlow(object):
                 library.upload_from_local(self.datasets[i].name)
             elif self.datasets[i].input_type == 'url':
                 library.upload_from_url(self.datasets[i].name)
-            elif self.datasets[i].input_type == 'galaxyfs':
-                library.upload_from_galaxy_filesystem(self.datasets[i].name)
             else:
-                print >> sys.stderr, "ERROR: Accepted dataset sources are: local, url, or galaxyfs"
-            return True
+                library.upload_from_galaxy_filesystem(self.datasets[i].name)
+        return 0
 
     def run_workflow(self):
         logging.info("Initiating Galaxy connection")
@@ -143,6 +149,7 @@ class GFlow(object):
         else:
             print >> sys.stderr, "ERROR: Workflow not runnable"
             sys.exit(1)
+        return 0
 
 def main():
     logging.basicConfig(filename='gflow.log', level=logging.INFO)
