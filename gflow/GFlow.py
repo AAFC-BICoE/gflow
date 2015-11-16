@@ -47,7 +47,7 @@ def read_config(configfile):
         sys.exit(1)
     options['output_history_name'] = config.get('output', 'output_history_name')
     options['workflow_src'] = config.get('workflow', 'source')
-    if options['workflow_src'] not in ['local', 'shared']:
+    if options['workflow_src'] not in ['local', 'shared', 'id']:
         print >> sys.stderr, "ERROR: Accepted dataset sources are: local or shared"
         sys.exit(1)
     options['workflow'] = config.get('workflow', 'workflow')
@@ -104,6 +104,8 @@ class GFlow(object):
         if self.workflow_src == 'local':
             workflow_json = json.load(open(self.workflow))
             wf = gi.workflows.import_new(workflow_json)
+        elif self.workflow_src == 'id':
+            wf = gi.workflows.get(self.workflow)
         else:
             wf = gi.workflows.import_shared(self.workflow)
         return wf
@@ -121,7 +123,14 @@ class GFlow(object):
             elif self.datasets[i].input_type == 'url':
                 library.upload_from_url(self.datasets[i].name)
             else:
-                library.upload_from_galaxy_filesystem(self.datasets[i].name)
+                try:
+                    library.upload_from_galaxy_fs(self.datasets[i].name)
+                except:
+                    print >> sys.stderr, "ERROR: File upload unsuccessful, only admins can " \
+                                         "upload files from the Galaxy filesystem"
+                    e = sys.exc_info()[0]
+                    print >> sys.stderr, e
+                    sys.exit(1)
         return 0
 
     def run_workflow(self):
@@ -150,6 +159,7 @@ class GFlow(object):
             print >> sys.stderr, "ERROR: Workflow not runnable"
             sys.exit(1)
         return 0
+
 
 def main():
     logging.basicConfig(filename='gflow.log', level=logging.INFO)

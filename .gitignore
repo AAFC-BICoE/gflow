@@ -61,3 +61,5 @@ data/
 .idea/
 config.txt
 cover/
+workflows/
+config/
