@@ -59,7 +59,6 @@ target/
 .DS_Store
 data/
 .idea/
-config.txt
 cover/
 workflows/
-config/
+config/config[0-9]*
