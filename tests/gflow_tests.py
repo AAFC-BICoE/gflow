@@ -2,21 +2,8 @@ import unittest
 from gflow.GFlow import *
 from nose.tools import raises
 
-class TestInput(unittest.TestCase):
 
-    def setUp(self):
-        self.input = Input("local", "data/data1.bed", "Input Dataset")
-
-    def test_source(self):
-        self.assertEqual("local", self.input.input_type)
-
-    def test_data(self):
-        self.assertEqual("data/data1.bed", self.input.name)
-
-    def test_label(self):
-        self.assertEqual("Input Dataset", self.input.label)
-
-class TestReadConfig(unittest.TestCase):
+class TestConfig(unittest.TestCase):
 
     def test_proper_number_of_datasets(self):
         configfile = "tests/configs/config0.txt"
@@ -52,6 +39,7 @@ class TestReadConfig(unittest.TestCase):
     def test_improper_dataset_src(self):
         configfile = "tests/configs/config2.txt"
         read_config(configfile)
+
 
 class TestGFlow:
 
