@@ -1,0 +1,28 @@
+[galaxy]
+
+galaxy_url = <galaxy_url> 
+galaxy_key = <galaxy_key>
+
+[library]
+
+library_name = <new_library_name>
+
+[input]
+
+dataset_src = [local | server | url | galaxyfs]
+num_datasets = 1
+data_0 = <dataset_location_or_url>
+label_0 = Input Dataset
+
+[output]
+
+output_history_name = <new_history_name>
+
+[workflow]
+
+source = [local | id | shared]
+workflow = <workflow_location_or_id>
+
+[tool_params]
+
+num_tools = 0
