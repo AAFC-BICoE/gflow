@@ -1,23 +1,14 @@
-# -*- coding: utf-8 -*-
-
-
-"""gflow.gflow: provides entry point main()."""
-
-
-__version__ = "0.2.0"
-
-
 import sys
 import json
 import logging
 from Input import Input
 from Config import Config
 from bioblend.galaxy.objects import *
+__version__ = "0.1.0"
 
 
 class GFlow(object):
 
-    """Object that interacts with Galaxy"""
     def __init__(self, config):
 
         self.logger = logging.getLogger('gflow.GFlow')
@@ -34,7 +25,7 @@ class GFlow(object):
         elif self.options.workflow_src == 'id':
             wf = gi.workflows.get(self.options.workflow)
         else:
-            wf = gi.workflows.import_shared(self.options.workflow)
+            wf = gi.workflows.import_shared(self.options.workflow)          # No shared URL to test yet
         return wf
 
     def import_data(self, library):
@@ -43,16 +34,16 @@ class GFlow(object):
             if self.datasets[i].input_type == 'local':
                 library.upload_from_local(self.datasets[i].name)
             elif self.datasets[i].input_type == 'url':
-                library.upload_from_url(self.datasets[i].name)
+                library.upload_from_url(self.datasets[i].name)      # Need a URL to test
             else:
                 try:
-                    library.upload_from_galaxy_fs(self.datasets[i].name)
+                    library.upload_from_galaxy_fs(self.datasets[i].name)        # Still doesn't work
                 except:
                     self.logger.error("File upload unsuccessful, only admins can "
                                       "upload files from the Galaxy filesystem")
                     e = sys.exc_info()[0]
                     self.logger.error(e)
-                sys.exit(1)
+                    sys.exit(1)
         return 0
 
     def set_tool_params(self):
@@ -82,7 +73,6 @@ class GFlow(object):
 
         if workflow.is_runnable:
             self.logger.info("Initiating workflow")
-
             if self.options.num_tools:
                 self.logger.info("Setting runtime tool parameters")
                 params = self.set_tool_params()
@@ -90,10 +80,10 @@ class GFlow(object):
             else:
                 workflow.run(input_map, outputhist)
             self.logger.info("Workflow finished successfully")
-
         else:
-            self.logger.error("Workflow not runnable")
+            self.logger.error("Workflow not runnable, missing required tools")
             sys.exit(1)
+
         return 0
 
 

@@ -3,6 +3,7 @@ import ConfigParser
 import sys
 import logging
 
+
 class Config(object):
 
     def __init__(self, configfile=None):
@@ -17,6 +18,7 @@ class Config(object):
         config.read(configfile)
 
         try:
+
             self.logger.debug("Storing Galaxy credentials")
             self.galaxy_url = config.get('galaxy', 'galaxy_url')
             self.galaxy_key = config.get('galaxy', 'galaxy_key')
@@ -39,6 +41,7 @@ class Config(object):
             if len(input_options) > 2 + 2 * self.num_datasets:
                 self.logger.error("More datasets given than 'num_datsets' specified")
                 sys.exit(1)
+
             self.logger.debug("Storing output history name")
             self.outputhist = config.get('output', 'output_history_name')
 
@@ -64,6 +67,7 @@ class Config(object):
                         param_value = config.get("tool_params", "param_" + str(i) + "-" + str(j))
                         temp_dict[param_label] = param_value
                     self.tool_params.append(temp_dict)
+
         except ConfigParser.NoOptionError as e:
             self.logger.error("Missing required option(s) in config file")
             self.logger.error(e)
@@ -75,7 +79,7 @@ class Config(object):
     def empty_value_check(self, config):
         for section in config.sections():
             for option in config.options(section):
-                value = config.get(section,option)
+                value = config.get(section, option)
                 if not value:
                     self.logger.error("Missing a value for required '%s' option" % option)
                     sys.exit(1)
