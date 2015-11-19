@@ -23,6 +23,9 @@ class Config(object):
             self.logger.debug("Storing Galaxy credentials")
             self.galaxy_url = os.environ.get("GALAXY_URL", None)
             self.galaxy_key = os.environ.get("GALAXY_KEY", None)
+            if not self.galaxy_key or not self.galaxy_url:
+                self.logger.error("GALAXY_URL and/or GALAXY_KEY environment variable(s) not set")
+                sys.exit(1)
 
             self.logger.debug("Storing new library name")
             self.library = config.get('library', 'library')
