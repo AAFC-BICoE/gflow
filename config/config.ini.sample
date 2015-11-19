@@ -1,28 +1,31 @@
-[galaxy]
-
-galaxy_url = <galaxy_url> 
-galaxy_key = <galaxy_key>
-
 [library]
 
-library_name = <new_library_name>
+library = Sample Library
 
 [input]
 
-dataset_src = [local | server | url | galaxyfs]
-num_datasets = 1
-data_0 = <dataset_location_or_url>
-label_0 = Input Dataset
+# local, url, or galaxyfs
+dataset_src = local
+num_datasets = 2
+data_0 = data/exons.bed
+label_0 = Exons
+data_1 = data/SNPs.bed
+label_1 = Features
 
 [output]
 
-output_history_name = <new_history_name>
+output_history_name = Sample History
 
 [workflow]
 
-source = [local | id | shared]
-workflow = <workflow_location_or_id>
+# local, id, or shared
+source = local
+workflow = workflows/galaxy101.ga
 
 [tool_params]
 
-num_tools = 0
+num_tools = 1
+tool_0 = 8
+num_params_0 = 1
+param_label_0-0 = lineNum
+param_0-0 = 10
