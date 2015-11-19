@@ -1,25 +1,28 @@
 [galaxy]
+
 galaxy_url = <galaxy_url> 
 galaxy_key = <galaxy_key>
 
 [library]
 
-# If library with this name doesn't exist one will be created
 library_name = <new_library_name>
 
 [input]
 
-# local, server, url, or galaxyfs
-dataset_src = local
+dataset_src = [local | server | url | galaxyfs]
 num_datasets = 1
-data0 = data/some-data.bed
-label0 = Input Dataset
+data_0 = <dataset_location_or_url>
+label_0 = Input Dataset
 
 [output]
+
 output_history_name = <new_history_name>
 
 [workflow]
 
-# local, id, or shared
-source = local
-workflow = workflows/some-workflow.ga
+source = [local | id | shared]
+workflow = <workflow_location_or_id>
+
+[tool_params]
+
+num_tools = 0

@@ -33,9 +33,12 @@ class Config(object):
             self.datasets = []
             self.labels = []
             for i in range(0, self.num_datasets):
-                self.datasets.append(config.get('input', "data" + str(i)))
-                self.labels.append(config.get('input', "label" + str(i)))
-
+                self.datasets.append(config.get('input', "data_" + str(i)))
+                self.labels.append(config.get('input', "label_" + str(i)))
+            input_options = config.options('input')
+            if len(input_options) > 2 + 2 * self.num_datasets:
+                self.logger.error("More datasets given than 'num_datsets' specified")
+                sys.exit(1)
             self.logger.debug("Storing output history name")
             self.outputhist = config.get('output', 'output_history_name')
 

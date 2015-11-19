@@ -17,17 +17,25 @@ class TestConfig(unittest.TestCase):
         Config("tests/config/config1.ini")
 
     @raises(SystemExit)
-    def test_more_tools_declared_than_given(self):
-        Config("tests/config/config4.ini")
+    def test_improper_dataset_src(self):
+        Config("tests/config/config2.ini")
 
     @raises(SystemExit)
     def test_improper_workflow_src(self):
         Config("tests/config/config3.ini")
 
     @raises(SystemExit)
-    def test_improper_dataset_src(self):
-        Config("tests/config/config2.ini")
+    def test_more_tools_declared_than_given(self):
+        Config("tests/config/config4.ini")
 
     @raises(SystemExit)
     def test_missing_value(self):
-        Config("tests/config/config5.ini")
+       Config("tests/config/config5.ini")
+
+    @raises(SystemExit)
+    def test_missing_or_misspelled_option(self):
+        Config("tests/config/config6.ini")
+
+    @raises(SystemExit)
+    def test_more_datasets_given_than_required(self):
+        Config("tests/config/config7.ini")

@@ -4,7 +4,7 @@ from gflow.GFlow import *
 
 class TestGFlow(unittest.TestCase):
 
-    def setup(self):
+    def setUp(self):
         self.options = Config("tests/config/config0.ini")
         self.gflow = GFlow(self.options)
 
