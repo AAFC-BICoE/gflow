@@ -1,8 +1,8 @@
 import sys
 import json
 import logging
-from Input import Input
-from Config import Config
+from input import Input
+from config import Config
 from bioblend.galaxy.objects import *
 __version__ = "0.1.0"
 

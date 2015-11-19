@@ -1,5 +1,5 @@
 import unittest
-from gflow.GFlow import *
+from gflow.config import *
 from nose.tools import raises
 
 class TestConfig(unittest.TestCase):

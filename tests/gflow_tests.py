@@ -1,5 +1,5 @@
 import unittest
-from gflow.GFlow import *
+from gflow.gflow import *
 from nose.tools import raises
 
 

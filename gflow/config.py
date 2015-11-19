@@ -2,6 +2,7 @@ import getopt
 import ConfigParser
 import sys
 import logging
+import os
 
 
 class Config(object):
@@ -20,8 +21,8 @@ class Config(object):
         try:
 
             self.logger.debug("Storing Galaxy credentials")
-            self.galaxy_url = config.get('galaxy', 'galaxy_url')
-            self.galaxy_key = config.get('galaxy', 'galaxy_key')
+            self.galaxy_url = os.environ.get("GALAXY_URL", None)
+            self.galaxy_key = os.environ.get("GALAXY_KEY", None)
 
             self.logger.debug("Storing new library name")
             self.library = config.get('library', 'library')
