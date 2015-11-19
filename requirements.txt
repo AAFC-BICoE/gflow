@@ -1,2 +1,2 @@
 bioblend
-nosetests
+nose
