@@ -1,7 +1,7 @@
 GFlow
 ========================
 
-This is a CLI application that allows datasets and a workflow to be specified in a config file and then have the workflow executed on an instance of Galaxy.
+This is a command line interface application that allows datasets and a workflow to be specified in a config file and then have the workflow executed on an instance of Galaxy.
 
 Installation
 ------------
