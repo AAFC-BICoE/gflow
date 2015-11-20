@@ -91,7 +91,7 @@ class Config(object):
 
     @staticmethod
     def print_usage(outstream):
-        usage = ("Usage: gflow.py [options] config.txt\n"
+        usage = ("Usage: gflow [options] config.txt\n"
                  "  Options:\n"
                  "    -h|--help           print this help message and exit")
         print >> outstream, usage
