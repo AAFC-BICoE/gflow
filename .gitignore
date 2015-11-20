@@ -57,8 +57,6 @@ docs/_build/
 target/
 
 .DS_Store
-data/
 .idea/
 cover/
-workflows/
 config/config[0-9]*
