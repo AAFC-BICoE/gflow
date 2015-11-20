@@ -1,18 +1,4 @@
-# -*- coding: utf-8 -*-
-
-
-"""setup.py: setuptools control."""
-
-
-import re
 from setuptools import setup
-
-
-version = re.search(
-    '^__version__\s*=\s*"(.*)"',
-    open('gflow/gflow.py').read(),
-    re.M
-    ).group(1)
 
 
 with open("README.md", "rb") as f:
@@ -20,15 +6,16 @@ with open("README.md", "rb") as f:
 
 
 setup(
-    name = "gflow",
+    name = "GFlow",
     packages = ["gflow"],
-    entry_points = {
-        "console_scripts": ['gflow = gflow.gflow:main']
-        },
-    version = version,
+    version = "0.1.0",
     description = "Command line tool for running Galaxy workflows.",
     long_description = long_descr,
     author = "Alex MacLean",
     author_email = "maclean199@gmail.com",
     url = "https://github.com/AAFC-MBB/gflow",
-    )
+    install_requires=[
+        "bioblend",
+        "nose",
+    ]
+)

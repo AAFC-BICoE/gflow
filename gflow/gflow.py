@@ -2,9 +2,7 @@ import sys
 import json
 import logging
 from input import Input
-from config import Config
 from bioblend.galaxy.objects import *
-__version__ = "0.1.0"
 
 
 class GFlow(object):
@@ -85,23 +83,3 @@ class GFlow(object):
             sys.exit(1)
 
         return 0
-
-
-def main():
-    logger = logging.getLogger('gflow')
-    logger.setLevel(logging.DEBUG)
-    fh = logging.FileHandler('gflow.log')
-    fh.setLevel(logging.DEBUG)
-    ch = logging.StreamHandler()
-    ch.setLevel(logging.ERROR)
-    fh_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s: %(message)s',
-                                     datefmt='%m/%d/%Y %I:%M:%S %p')
-    ch_formatter = logging.Formatter('%(name)s - %(levelname)s: %(message)s')
-    fh.setFormatter(fh_formatter)
-    ch.setFormatter(ch_formatter)
-    logger.addHandler(ch)
-    logger.addHandler(fh)
-
-    options = Config()
-    gflow = GFlow(options)
-    gflow.run_workflow()
