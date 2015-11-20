@@ -41,7 +41,6 @@ class GFlow(object):
                                       "upload files from the Galaxy filesystem")
                     e = sys.exc_info()[0]
                     self.logger.error(e)
-                    sys.exit(1)
         return 0
 
     def set_tool_params(self):
@@ -69,17 +68,22 @@ class GFlow(object):
         self.logger.info("Creating input map")
         input_map = dict(zip(workflow.input_labels, library.get_datasets()))
 
+        results = None
         if workflow.is_runnable:
-            self.logger.info("Initiating workflow")
             if self.options.num_tools:
                 self.logger.info("Setting runtime tool parameters")
                 params = self.set_tool_params()
-                workflow.run(input_map, outputhist, params)
+                self.logger.info("Initiating workflow")
+                results = workflow.run(input_map, outputhist, params)
             else:
-                workflow.run(input_map, outputhist)
-            self.logger.info("Workflow finished successfully")
+                self.logger.info("Initiating workflow")
+                results = workflow.run(input_map, outputhist)
         else:
             self.logger.error("Workflow not runnable, missing required tools")
-            sys.exit(1)
 
-        return 0
+        if results:
+            self.logger.info("Workflow finished successfully")
+        else:
+            self.logger.error("Workflow did not finish")
+
+        return results
