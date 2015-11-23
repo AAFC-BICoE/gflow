@@ -1,6 +1,8 @@
 import logging
 
-
+"""
+Initialize logging
+"""
 logger = logging.getLogger('gflow')
 logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler('gflow.log')

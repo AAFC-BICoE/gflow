@@ -8,6 +8,12 @@ from gflow.config import Config
 
 
 def parse_options():
+    """
+    Get the location of the config file from the command line.
+
+    Returns:
+        configfile (str): The file location parsed from the command line.
+    """
     outstream = sys.stdout
     optstr = "h:"
     longopts = ["help"]
@@ -37,11 +43,23 @@ def parse_options():
     return configfile
 
 def print_usage(outstream):
+    """
+    Print usage when no config file is given or user users help flag.
+
+    Args:
+        outstream: Where to print the usage to.
+    Returns:
+        None
+    """
     usage = ("Usage: gflow [options] config.txt\n"
              "  Options:\n"
              "    -h|--help           print this help message and exit")
     print >> outstream, usage
+    return
 
+"""
+Main method for parsing the config file from the command and beginning the workflow.
+"""
 if __name__ == '__main__':
     configfile = parse_options()
     options = Config(configfile)

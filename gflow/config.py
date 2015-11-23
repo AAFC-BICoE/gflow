@@ -4,11 +4,16 @@ import os
 
 
 class Config(object):
+    """
+    Read a config file and saves its contents.
+
+    Args:
+        configfile (str): The location of the configuration file.
+    """
 
     def __init__(self, configfile):
 
         self.logger = logging.getLogger('gflow.Config')
-
         self.logger.info("Reading config file")
         config = ConfigParser.RawConfigParser()
         config.read(configfile)
@@ -71,8 +76,19 @@ class Config(object):
         self.empty_value_check(config)
 
     def empty_value_check(self, config):
+        """
+        Check the config file for options with no value.
+
+        Args:
+            config (RawConfigParser): The Config object to check.
+        Returns:
+            True if successful, False otherwise.
+        """
+        result = True
         for section in config.sections():
             for option in config.options(section):
                 value = config.get(section, option)
                 if not value:
                     self.logger.error("Missing a value for required option '%s'" % option)
+                    result = False
+        return result
