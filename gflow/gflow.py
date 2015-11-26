@@ -137,5 +137,4 @@ class GFlow(object):
         else:
             self.logger.error("Workflow did not finish")
 
-        print results
         return results
