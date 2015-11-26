@@ -1,0 +1,22 @@
+---
+input:
+  dataset_src: local
+  datasets:
+    dataset_0:
+      data: data/exons.bed
+      data_label: Exons
+    dataset_1:
+      data: data/SNPs.bed
+      data_label: Features
+library: "Test Library"
+output: "Test History"
+tool_runtime_params:
+  tool_0:
+    step_id: 8
+    params:
+      param_0:
+        param_name: lineNum
+        param_value: 10
+workflow:
+  workflow_src: id
+  workflow: f597429621d6eb2b

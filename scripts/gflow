@@ -4,7 +4,6 @@
 import getopt
 import sys
 from gflow.gflow import GFlow
-from gflow.config import Config
 
 
 def parse_options():
@@ -24,13 +23,13 @@ def parse_options():
             sys.exit(0)
         else:
             pass
-    configfile = None
+    config = None
     if len(args) > 0:
-        configfile = args[0]
+        config = args[0]
         try:
-            instream = open(configfile, "r")
+            instream = open(config, "r")
         except IOError as e:
-            print >> sys.stderr, "ERROR: Cannot output file %s" % configfile
+            print >> sys.stderr, "ERROR: Cannot open output file %s" % config
             print >> sys.stderr, e
             sys.exit(1)
     elif not sys.stdin.isatty():
@@ -40,7 +39,8 @@ def parse_options():
         print_usage(sys.stderr)
         sys.exit(1)
     instream.close()
-    return configfile
+    return config
+
 
 def print_usage(outstream):
     """
@@ -57,11 +57,9 @@ def print_usage(outstream):
     print >> outstream, usage
     return
 
-"""
-Main method for parsing the config file from the command and beginning the workflow.
-"""
+
+# Main method for parsing the config file from the command and beginning the workflow.
 if __name__ == '__main__':
     configfile = parse_options()
-    options = Config(configfile)
-    gflow = GFlow(options)
+    gflow = GFlow(configfile)
     gflow.run_workflow()
