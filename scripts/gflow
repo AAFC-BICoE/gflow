@@ -58,8 +58,22 @@ def print_usage(outstream):
     return
 
 
+def main():
+    configfile = parse_options()
+    try:
+        gflow = GFlow(configfile)
+    except ValueError:
+        sys.exit(1)
+    except RuntimeError:
+        sys.exit(1)
+    try:
+        gflow.run_workflow()
+    except IOError:
+        sys.exit(2)
+    except ValueError:
+        sys.exit(1)
+
+
 # Main method for parsing the config file from the command and beginning the workflow.
 if __name__ == '__main__':
-    configfile = parse_options()
-    gflow = GFlow(configfile)
-    gflow.run_workflow()
+    sys.exit(main())
