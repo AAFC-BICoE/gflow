@@ -1,0 +1,20 @@
+---
+input:
+  dataset_src: local
+  datasets:
+    dataset_0:
+      data_label: Exons
+      data: data/exons.bed
+    dataset_1:
+      data_label: Features
+      data: data/SNPs.bed
+library: "Test Library"
+output: "Test History"
+tool_runtime_params:
+  tool_0:
+      param_0:
+        param_name: lineNum
+        param_value: 10
+workflow:
+  workflow_src: local
+  workflow: workflows/galaxy101.ga
