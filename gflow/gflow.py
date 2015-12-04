@@ -23,22 +23,27 @@ class GFlow(object):
         self.logger.info("Reading config file")
         with open(configfile, "r") as ymlfile:
             self.cfg = yaml.load(ymlfile)
+        self.logger.info("Checking config file for empty values")
         self.check_for_empty_values(self.cfg)
-        self.logger.info("Reading Galaxy credentials")
-        self.galaxy_url = os.environ.get("GALAXY_URL", None)
-        self.galaxy_key = os.environ.get("GALAXY_KEY", None)
-        if not self.galaxy_key or not self.galaxy_url:
-            self.logger.error("GALAXY_URL and/or GALAXY_KEY environment variable(s) not set")
-            raise ValueError
 
-    def check_for_empty_values(self, d):
-        if isinstance(d, dict):
-            for k in d:
-                self.check_for_empty_values(d[k])
+
+    def check_for_empty_values(self, config):
+        """
+        Make sure no required values are missing in the config file.
+
+        Args:
+            config (dict): The config dictionary containing the key value pairs pulled from the config file.
+        Returns:
+            True is successful, raises RuntimeError if a value is empty.
+        """
+        if isinstance(config, dict):
+            for k in config:
+                self.check_for_empty_values(config[k])
         else:
-            if d is None:
+            if config is None:
                 self.logger.error("Missing required value in config file")
                 raise RuntimeError()
+        return True
 
     def import_workflow(self, gi):
         """
@@ -59,8 +64,6 @@ class GFlow(object):
                 raise IOError
         elif self.cfg['workflow']['workflow_src'] == 'id':
             wf = gi.workflows.get(self.cfg['workflow']['workflow'])
-        elif self.cfg['workflow']['workflow_src'] == 'shared':
-            wf = gi.workflows.import_shared(self.cfg['workflow']['workflow'])  # No shared URL to test yet
         else:
             self.logger.error("Workflow source must be local, workflow, or shared")
             raise ValueError
@@ -87,14 +90,6 @@ class GFlow(object):
                     raise IOError
             elif self.cfg['input']['dataset_src'] == 'url':
                 results = library.upload_from_url(self.cfg['input']['datasets'][str(i)]['data'])  # Need a URL to test
-            elif self.cfg['input']['dataset_src'] == "galaxyfs":
-                try:
-                    results = library.upload_from_galaxy_fs(self.cfg['input']['datasets'][str(i)]['data'])
-                except:
-                    self.logger.error("File upload unsuccessful, only admins can "
-                                      "upload files from the Galaxy filesystem")
-                    e = sys.exc_info()[0]
-                    self.logger.error(e)
             else:
                 self.logger.error("Dataset source must be local, url, or galaxyfs")
                 raise ValueError
@@ -133,6 +128,16 @@ class GFlow(object):
              results (tuple): List of output datasets and output history if successful, None if not successful.
         """
         self.logger.info("Initiating Galaxy connection")
+        self.logger.info("Checking for Galaxy credentials")
+        try:
+            self.galaxy_url = self.cfg['galaxy']['galaxy_url']
+            self.galaxy_key = self.cfg['galaxy']['galaxy_key']
+        except KeyError:
+            self.galaxy_url = os.environ.get("GALAXY_URL", None)
+            self.galaxy_key = os.environ.get("GALAXY_KEY", None)
+        if not self.galaxy_key or not self.galaxy_url:
+            self.logger.error("GALAXY_URL and/or GALAXY_KEY environment variable(s) not set")
+            raise ValueError
         gi = GalaxyInstance(self.galaxy_url, self.galaxy_key)
 
         self.logger.info("Importing workflow")

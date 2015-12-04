@@ -12,11 +12,9 @@ library: "Test Library"
 output: "Test History"
 tool_runtime_params:
   tool_0:
-    step_id: 8
-    params:
-      param_0:
-        param_name: lineNum
-        param_value: 10
+    param_0:
+      param_name: lineNum
+      param_value: 10
 workflow:
-  workflow_src: id
-  workflow: f597429621d6eb2b
+  workflow_src: local
+  workflow: workflows/galaxy101.ga
