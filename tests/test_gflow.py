@@ -1,12 +1,12 @@
 from gflow.gflow import *
 import pytest
 
-@pytest.fixture
-def gi_fix():
-    galaxy_url = os.environ.get("GALAXY_URL", None)
-    galaxy_key = os.environ.get("GALAXY_KEY", None)
-    gi = GalaxyInstance(galaxy_url, galaxy_key)
-    return gi
+# @pytest.fixture
+# def gi_fix():
+#     galaxy_url = os.environ.get("GALAXY_URL", None)
+#     galaxy_key = os.environ.get("GALAXY_KEY", None)
+#     gi = GalaxyInstance(galaxy_url, galaxy_key)
+#     return gi
 
 def test_config_file_with_empty_value_rejected(tmpdir):
     p = tmpdir.mkdir("sub").join("tmp_config.yml")
