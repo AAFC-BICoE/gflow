@@ -30,62 +30,62 @@ def test_config_file_with_no_empty_files_accepted():
 #     with pytest.raises(ValueError):
 #         gflow.run_workflow()
 
-def test_import_workflow_from_local_file(gi_fix):
-    gflow = GFlow('tests/config/config0.yml')
-    gi = gi_fix
-    assert gflow.import_workflow(gi)
-
-def test_import_workflow_with_bad_file_name(gi_fix):
-    gflow = GFlow('tests/config/config0.yml')
-    gi = gi_fix
-    gflow.cfg['workflow']['workflow'] = "doesn't exist"
-    with pytest.raises(IOError):
-        gflow.import_workflow(gi)
-
-def test_get_workflow_from_id(gi_fix):
-    gflow = GFlow('tests/config/config0.yml')
-    gi = gi_fix
-    gflow.cfg['workflow']['workflow_src'] = 'id'
-    workflows = gi.workflows.list()
-    id = workflows[0].id
-    gflow.cfg['workflow']['workflow'] = id
-    assert gflow.import_workflow(gi)
-
-def test_invalid_workflow_source(gi_fix):
-    gflow = GFlow('tests/config/config0.yml')
-    gi = gi_fix
-    gflow.cfg['workflow']['workflow_src'] = 'wrong'
-    with pytest.raises(ValueError):
-        gflow.import_workflow(gi)
-
-def test_data_from_local_files(gi_fix):
-    gflow = GFlow('tests/config/config0.yml')
-    gi = gi_fix
-    library = gi.libraries.create(gflow.cfg['library'])
-    assert gflow.import_data(library)
-
-def test_import_data_with_bad_file_name(gi_fix):
-    gflow = GFlow('tests/config/config0.yml')
-    gi = gi_fix
-    library = gi.libraries.create(gflow.cfg['library'])
-    gflow.cfg['input']['datasets']['dataset_0']['data'] = "doesn't exist"
-    with pytest.raises(IOError):
-        gflow.import_data(library)
-
-def test_invalid_data_source(gi_fix):
-    gflow = GFlow('tests/config/config0.yml')
-    gi = gi_fix
-    library = gi.libraries.create(gflow.cfg['library'])
-    gflow.cfg['input']['dataset_src'] = "unsupported"
-    with pytest.raises(ValueError):
-        gflow.import_data(library)
-
-def test_set_tool_params_success(gi_fix):
-    gflow = GFlow('tests/config/config0.yml')
-    gi = gi_fix
-    wf = gflow.import_workflow(gi)
-    assert gflow.set_tool_params(wf)
-
-def test_successful_workflow_run(gi_fix):
-    gflow = GFlow('tests/config/config0.yml')
-    assert gflow.run_workflow()
+# def test_import_workflow_from_local_file(gi_fix):
+#     gflow = GFlow('tests/config/config0.yml')
+#     gi = gi_fix
+#     assert gflow.import_workflow(gi)
+#
+# def test_import_workflow_with_bad_file_name(gi_fix):
+#     gflow = GFlow('tests/config/config0.yml')
+#     gi = gi_fix
+#     gflow.cfg['workflow']['workflow'] = "doesn't exist"
+#     with pytest.raises(IOError):
+#         gflow.import_workflow(gi)
+#
+# def test_get_workflow_from_id(gi_fix):
+#     gflow = GFlow('tests/config/config0.yml')
+#     gi = gi_fix
+#     gflow.cfg['workflow']['workflow_src'] = 'id'
+#     workflows = gi.workflows.list()
+#     id = workflows[0].id
+#     gflow.cfg['workflow']['workflow'] = id
+#     assert gflow.import_workflow(gi)
+#
+# def test_invalid_workflow_source(gi_fix):
+#     gflow = GFlow('tests/config/config0.yml')
+#     gi = gi_fix
+#     gflow.cfg['workflow']['workflow_src'] = 'wrong'
+#     with pytest.raises(ValueError):
+#         gflow.import_workflow(gi)
+#
+# def test_data_from_local_files(gi_fix):
+#     gflow = GFlow('tests/config/config0.yml')
+#     gi = gi_fix
+#     library = gi.libraries.create(gflow.cfg['library'])
+#     assert gflow.import_data(library)
+#
+# def test_import_data_with_bad_file_name(gi_fix):
+#     gflow = GFlow('tests/config/config0.yml')
+#     gi = gi_fix
+#     library = gi.libraries.create(gflow.cfg['library'])
+#     gflow.cfg['input']['datasets']['dataset_0']['data'] = "doesn't exist"
+#     with pytest.raises(IOError):
+#         gflow.import_data(library)
+#
+# def test_invalid_data_source(gi_fix):
+#     gflow = GFlow('tests/config/config0.yml')
+#     gi = gi_fix
+#     library = gi.libraries.create(gflow.cfg['library'])
+#     gflow.cfg['input']['dataset_src'] = "unsupported"
+#     with pytest.raises(ValueError):
+#         gflow.import_data(library)
+#
+# def test_set_tool_params_success(gi_fix):
+#     gflow = GFlow('tests/config/config0.yml')
+#     gi = gi_fix
+#     wf = gflow.import_workflow(gi)
+#     assert gflow.set_tool_params(wf)
+#
+# def test_successful_workflow_run(gi_fix):
+#     gflow = GFlow('tests/config/config0.yml')
+#     assert gflow.run_workflow()
