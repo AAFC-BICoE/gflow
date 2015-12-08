@@ -61,7 +61,7 @@ def print_usage(outstream):
 def main():
     configfile = parse_options()
     try:
-        gflow = GFlow(configfile)
+        gflow = GFlow.from_config_file(configfile)
     except ValueError:
         sys.exit(1)
     except RuntimeError:
@@ -75,6 +75,8 @@ def main():
     except ValueError:
         sys.exit(1)
     except RuntimeError:
+        sys.exit(1)
+    except KeyError:
         sys.exit(1)
 
 
