@@ -27,6 +27,7 @@ Then, execute the ``gflow`` command:
 
 Or, if running from the source directory without having installed the application:
 
+    $ export PYTHONPATH=$PYTHONPATH:$PWD
     $ ./scripts/gflow config/config.yml
     
 Tests
