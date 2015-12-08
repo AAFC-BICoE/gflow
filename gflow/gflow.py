@@ -25,7 +25,9 @@ class GFlow(object):
             with open(configfile, "r") as ymlfile:
                 config = yaml.load(ymlfile)
             self.logger.info("Checking config file for empty values")
-            self.check_for_empty_values(config)
+            if self.check_for_empty_values(config):
+                self.logger.error("No empty values allowed in config file")
+                raise ValueError
             try:
                 self.galaxy_url = config['galaxy_url']
                 self.galaxy_key = config['galaxy_key']
@@ -33,8 +35,8 @@ class GFlow(object):
                 self.history_name = config['history']
                 self.workflow_source = config['workflow_source']
                 self.workflow = config['workflow']
-            except KeyError:
-                self.logger.error("Missing required parameter(s)")
+            except KeyError as e:
+                self.logger.error("Missing required parameter: " + str(e))
                 raise KeyError
             # Optional parameters follow
             self.datasets_source = None
@@ -52,8 +54,10 @@ class GFlow(object):
         else:
             if not galaxy_url or not galaxy_key or not library_name or not history_name or not workflow_source \
                     or not workflow:
-                self.logger.error("Missing required parameter(s)")
-                raise RuntimeError()
+                for i in [galaxy_url, galaxy_key, library_name, history_name, workflow_source, workflow]:
+                    if not i:
+                        self.logger.error("Missing required parameter: " + i)
+                        raise RuntimeError()
             self.galaxy_url = galaxy_url
             self.galaxy_key = galaxy_key
             self.library_name = library_name
@@ -73,40 +77,39 @@ class GFlow(object):
 
     def check_for_empty_values(self, config):
         """
-        Make sure no required values are missing in the config file.
+        Make sure no values are missing in the config file.
 
         Args:
             config (dict): The config dictionary containing the key value pairs pulled from the config file.
         Returns:
-            True is successful, raises RuntimeError if a value is empty.
+            False if no empties found, True if a value is empty.
         """
         if isinstance(config, dict):
             for k in config:
                 self.check_for_empty_values(config[k])
         else:
             if config is None:
-                self.logger.error("Missing required value in config file")
-                raise RuntimeError()
-        return True
+                return True
+        return False
 
-    def check_for_runtime_params(self, workflow):
+    def missing_runtime_params(self, workflow):
         """
-        Make sure no required values are missing in the config file.
+        Check for missing runtime parameters required for workflow.
 
         Args:
-            config (dict): The config dictionary containing the key value pairs pulled from the config file.
+            workflow (Workflow): The Workflow object containing the tool information.
         Returns:
-            True is successful, raises RuntimeError if a value is empty.
+            Name of parameter if runtime parameter is missing, None otherwise
         """
-        for s in workflow.sorted_step_ids():
-            values = workflow.steps[s].tool_inputs.viewvalues()
+        for id in workflow.sorted_step_ids():
+            values = workflow.steps[id].tool_inputs.viewvalues()
             for i in values:
                 if isinstance(i, dict):
                     more_values = i.viewvalues()
                     for j in more_values:
                         if str(j) == "RuntimeValue":
-                            return True
-        return False
+                            return [key for key, value in workflow.steps[id].tool_inputs.iteritems() if value == i]
+        return None
 
     def import_workflow(self, gi):
         """
@@ -145,6 +148,7 @@ class GFlow(object):
         results = None
         for i in range(0, len(self.datasets)):
             self.logger.debug("Dataset source is '%s'" % self.datasets_source)
+            self.logger.debug("Uploading dataset: " + self.datasets[i])
             if self.datasets_source == 'local':
                 try:
                     results = library.upload_from_local(self.datasets[i])
@@ -154,11 +158,11 @@ class GFlow(object):
             elif self.datasets_source == 'url':
                 results = library.upload_from_url(self.datasets[i])  # Need a URL to test
             else:
-                self.logger.error("Dataset source must be local, url, or galaxyfs")
+                self.logger.error("Dataset source must be local or url")
                 raise ValueError
         return results
 
-    def set_tool_params(self, wf):
+    def set_runtime_params(self, wf):
         """
         Map the parameters of tools requiring runtime parameters to the step ID of each tool.
 
@@ -196,42 +200,32 @@ class GFlow(object):
         workflow = self.import_workflow(gi)
         if not workflow.is_runnable:
             self.logger.error("Workflow not runnable, missing required tools")
-            return
+            raise RuntimeError
 
         self.logger.info("Creating data library '%s'" % self.library_name)
         library = gi.libraries.create(self.library_name)
 
+        input_map = None
         if self.datasets:
             self.logger.info("Importing data")
             self.import_data(library)
+            self.logger.info("Creating input map")
+            input_map = dict(zip(workflow.input_labels, library.get_datasets()))
 
         self.logger.info("Creating output history '%s'" % self.history_name)
         outputhist = gi.histories.create(self.history_name)
 
-        self.logger.info("Creating input map")
-        input_map = dict(zip(workflow.input_labels, library.get_datasets()))
-
-        results = None
-
-        try:
-            if self.runtime_params:
-                self.logger.info("Setting runtime tool parameters")
-                params = self.set_tool_params(workflow)
-                self.logger.info("Initiating workflow")
-                results = workflow.run(input_map, outputhist, params)
-            else:
-                if self.check_for_runtime_params(workflow):
-                    self.logger.error("Missing runtime paramter(s)")
-                    raise ValueError
-                self.logger.info("Initiating workflow")
-                results = workflow.run(input_map, outputhist)
-        except RuntimeError as e:
-            self.logger.error(e)
-            raise RuntimeError
-
-        if results:
-            self.logger.info("Workflow finished successfully")
+        if self.runtime_params:
+            self.logger.info("Setting runtime tool parameters")
+            params = self.set_runtime_params(workflow)
+            self.logger.info("Initiating workflow")
+            results = workflow.run(input_map, outputhist, params)
         else:
-            self.logger.error("Workflow did not finish")
+            param = self.missing_runtime_params(workflow)
+            if param:
+                self.logger.error("Missing runtime paramter: " + str(param))
+                raise RuntimeError
+            self.logger.info("Initiating workflow")
+            results = workflow.run(input_map, outputhist)
 
         return results
