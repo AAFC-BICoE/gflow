@@ -6,20 +6,20 @@ This is a command line interface application that allows datasets and a workflow
 Installation
 ------------
 
-Installation right from the source tree (or via pip from PyPI)::
+Installation right from the source tree:
 
     $ pip install -r requirements.txt
-    $ python setup.py install
+    $ pip install .
 
 Configuration
 -------------
 
-Make a copy of the sample in ``config/`` and configure the parameters as desired.
+Make a copy of the sample file in ``config/`` and configure the parameters in it as desired:
+
+    $ cp config/config.yml.sample config/config.yml
 
 Usage
 -----
-
-**Environment variables GALAXY_URL and GALAXY_KEY must be set before this application can be used.**
 
 Then, execute the ``gflow`` command:
 
@@ -27,13 +27,17 @@ Then, execute the ``gflow`` command:
 
 Or, if running from the source directory without having installed the application:
 
+    $ export PYTHONPATH=$PYTHONPATH:$PWD
     $ ./scripts/gflow config/config.yml
     
 Tests
 -----
 
-After setting the environment variables mentioned above, execute the tests with:
-
-    $ nosetests
-    
 A small number of data files and workflow files have been included in ``data/`` and ``workflow/`` for testing purposes.
+Execute the tests with:
+
+    $ py.test
+
+Generate a code coverage report:
+
+    $ py.test --cov gflow
