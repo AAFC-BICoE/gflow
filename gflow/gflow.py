@@ -1,7 +1,6 @@
 import json
 import logging
 import yaml
-import os
 from bioblend.galaxy.objects import *
 
 
@@ -199,7 +198,7 @@ class GFlow(object):
                         pass
         return params
 
-    def run_workflow(self):
+    def run_workflow(self, TEMP_WF, TEMP_LIB):
         """
         Make the connection, set up for the workflow, then run it.
 
@@ -244,6 +243,11 @@ class GFlow(object):
                 raise RuntimeError
             self.logger.info("Initiating workflow")
             results = workflow.run(input_map, outputhist)
+
+        if TEMP_WF:
+            gi.workflows.delete(workflow.id)
+        if TEMP_LIB:
+            gi.libraries.delete(library.id)
 
         return results
 
