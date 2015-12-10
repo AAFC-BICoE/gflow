@@ -5,7 +5,7 @@ from yaml import parser
 from bioblend.galaxy.objects import GalaxyInstance
 
 
-class GFlow(object):
+class GalaxyCMDWorkflow(object):
     def __init__(self, datadict):
         """
         Interact with a Galaxy instance
@@ -25,7 +25,7 @@ class GFlow(object):
             self.runtime_params (dict): A collection of required runtime parameters
 
         """
-        self.logger = logging.getLogger('gflow.GFlow')
+        self.logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
         self.galaxy_url = datadict['galaxy_url']
         self.galaxy_key = datadict['galaxy_key']
         self.library_name = datadict['library_name']
@@ -51,7 +51,7 @@ class GFlow(object):
         Args:
             configfile (str): The name of the config file to be read
         """
-        cls.logger = logging.getLogger('gflow.GFlow')
+        cls.logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
         cls.logger.info("Reading configuration file")
         try:
             with open(configfile, "r") as ymlfile:
@@ -60,7 +60,7 @@ class GFlow(object):
             cls.logger.error("Incorrect yaml syntax in config file")
             raise parser.ParserError
         try:
-            missing = GFlow.verify_config_file(config)
+            missing = GalaxyCMDWorkflow.verify_config_file(config)
             if missing:
                 cls.logger.error("Missing value for required parameter: " + missing)
                 raise ValueError
@@ -86,7 +86,7 @@ class GFlow(object):
             datasets (List): A collection of filenames or URLs for the datasets
             runtime_params (dict): A collection of required runtime parameters
         """
-        cls.logger = logging.getLogger('gflow.GFlow')
+        cls.logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
         cls.logger.info("Reading from parameters")
         config = {'galaxy_url': galaxy_url, 'galaxy_key': galaxy_key, 'library_name': library_name,
                   'history_name': history_name, 'workflow_source': workflow_source, 'workflow': workflow,
@@ -261,7 +261,7 @@ class GFlow(object):
 if __name__ == '__main__':
     datasets = ['data/exons.bed', 'data/SNPs.bed']
     runtime_params = {'tool_0': {'param_0': {'name': 'lineNum', 'value': 10}}}
-    gflow = GFlow.init_from_params('http://10.117.231.27', 'd2e3a6e000eddd713a15307e3bedfd61', 'Params Library',
-                                   'Params History', 'local', 'workflows/galaxy101.ga', 'local',
-                                   datasets, runtime_params)
+    gflow = GalaxyCMDWorkflow.init_from_params('http://10.117.231.27', 'd2e3a6e000eddd713a15307e3bedfd61',
+                                               'Params Library', 'Params History', 'local', 'workflows/galaxy101.ga',
+                                               'local', datasets, runtime_params)
     gflow.run(False, False)

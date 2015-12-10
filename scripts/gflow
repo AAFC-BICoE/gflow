@@ -3,7 +3,7 @@
 
 import argparse
 import sys
-from gflow.gflow import GFlow
+from gflow.GalaxyCMDWorkflow import GalaxyCMDWorkflow
 from yaml import parser
 
 
@@ -60,7 +60,7 @@ def print_usage(outstream):
 def main():
     configfile = parse_options()
     try:
-        gflow = GFlow.init_from_config_file(configfile)
+        gflow = GalaxyCMDWorkflow.init_from_config_file(configfile)
     except (ValueError, RuntimeError, KeyError, parser.ParserError):
         sys.exit(1)
     try:
