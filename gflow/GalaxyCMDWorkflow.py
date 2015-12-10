@@ -63,10 +63,10 @@ class GalaxyCMDWorkflow(object):
             missing = GalaxyCMDWorkflow.verify_config_file(config)
             if missing:
                 cls.logger.error("Missing value for required parameter: " + missing)
-                raise ValueError
+                raise ValueError("Missing value for required parameter: " + missing)
         except KeyError as e:
             cls.logger.error("Missing required parameter: " + str(e))
-            raise KeyError(e)
+            raise KeyError("Missing required parameter: " + str(e))
         return cls(config)
 
     @classmethod
