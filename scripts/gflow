@@ -1,0 +1,74 @@
+#! /usr/bin/env python
+
+
+import argparse
+import sys
+from gflow.GalaxyCMDWorkflow import GalaxyCMDWorkflow
+from yaml import parser
+
+
+TEMP_WF = False
+TEMP_LIB = False
+VERBOSE = False
+
+
+def parse_options():
+    """
+    Get the location of the config file from the command line.
+
+    Returns:
+        configfile (str): The file location parsed from the command line.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("configfile", type=str,
+                        help="config file with parameters")
+    parser.add_argument('-w', "--tempwf", action="store_true",
+                        help="do not save imported workflow to Galaxy")
+    parser.add_argument("-l", "--templib", action="store_true",
+                        help="do not save imported library to Galaxy")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="increase output verbosity")
+    args = parser.parse_args()
+    if args.tempwf:
+        global TEMP_WF
+        TEMP_WF = True
+    if args.templib:
+        global TEMP_LIB
+        TEMP_LIB = True
+    if args.verbose:
+        global VERBOSE
+        VERBOSE = True
+    return args.configfile
+
+
+def print_usage(outstream):
+    """
+    Print usage when no config file is given or user users help flag.
+
+    Args:
+        outstream: Where to print the usage to.
+    Returns:
+        None
+    """
+    usage = ("Usage: gflow [options] config.txt\n"
+             "  Options:\n"
+             "    -h|--help           print this help message and exit")
+    print >> outstream, usage
+    return
+
+
+def main():
+    configfile = parse_options()
+    try:
+        gflow = GalaxyCMDWorkflow.init_from_config_file(configfile)
+    except (ValueError, RuntimeError, KeyError, parser.ParserError):
+        sys.exit(1)
+    try:
+        gflow.run(TEMP_WF, TEMP_LIB)
+    except (ValueError, RuntimeError, KeyError):
+        sys.exit(1)
+    except IOError:
+        sys.exit(2)
+
+if __name__ == '__main__':
+    sys.exit(main())
