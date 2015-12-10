@@ -1,7 +1,8 @@
 import json
 import logging
 import yaml
-from bioblend.galaxy.objects import *
+from yaml import parser
+from bioblend.galaxy.objects import GalaxyInstance
 
 
 class GFlow(object):
@@ -25,16 +26,12 @@ class GFlow(object):
 
         """
         self.logger = logging.getLogger('gflow.GFlow')
-        try:
-            self.galaxy_url = datadict['galaxy_url']
-            self.galaxy_key = datadict['galaxy_key']
-            self.library_name = datadict['library_name']
-            self.history_name = datadict['history_name']
-            self.workflow_source = datadict['workflow_source']
-            self.workflow = datadict['workflow']
-        except KeyError as e:
-            self.logger.error("Missing required parameter: " + str(e))
-            raise KeyError
+        self.galaxy_url = datadict['galaxy_url']
+        self.galaxy_key = datadict['galaxy_key']
+        self.library_name = datadict['library_name']
+        self.history_name = datadict['history_name']
+        self.workflow_source = datadict['workflow_source']
+        self.workflow = datadict['workflow']
         # Optional parameters follow
         self.datasets_source = None
         self.datasets = None
@@ -44,10 +41,10 @@ class GFlow(object):
             self.datasets = datadict['datasets']
             self.runtime_params = datadict['runtime_params']
         except KeyError as e:
-            self.logger.warning("%s parameter not set", e)
+            self.logger.warning("%s parameter(s) not set", e)
 
     @classmethod
-    def from_config_file(cls, configfile):
+    def init_from_config_file(cls, configfile):
         """
         Makes a GFlow object from a config file
 
@@ -56,14 +53,25 @@ class GFlow(object):
         """
         cls.logger = logging.getLogger('gflow.GFlow')
         cls.logger.info("Reading configuration file")
-        with open(configfile, "r") as ymlfile:
-            config = yaml.load(ymlfile)
-        GFlow.check_for_empty_values(cls, config)
+        try:
+            with open(configfile, "r") as ymlfile:
+                config = yaml.load(ymlfile)
+        except parser.ParserError:
+            cls.logger.error("Incorrect yaml syntax in config file")
+            raise parser.ParserError
+        try:
+            missing = GFlow.verify_config_file(config)
+            if missing:
+                cls.logger.error("Missing value for required parameter: " + missing)
+                raise ValueError
+        except KeyError as e:
+            cls.logger.error("Missing required parameter: " + str(e))
+            raise KeyError(e)
         return cls(config)
 
     @classmethod
-    def from_params(cls, galaxy_url=None, galaxy_key=None, library_name=None, history_name=None,
-                    workflow_source=None, workflow=None, datasets_source=None, datasets=None, runtime_params=None):
+    def init_from_params(cls, galaxy_url=None, galaxy_key=None, library_name=None, history_name=None,
+                         workflow_source=None, workflow=None, datasets_source=None, datasets=None, runtime_params=None):
         """
         Makes GFlow object from provided parameters
 
@@ -86,31 +94,27 @@ class GFlow(object):
         return cls(config)
 
     @staticmethod
-    def check_for_empty_values(cls, value):
+    def verify_config_file(config):
         """
-        Make sure no values are missing from the config file.
+        Make sure no values are missing from the config file
 
         Args:
-            cls (cls): The class object
-            value (dict): The config dictionary containing the key value pairs pulled from the config file.
+            config (dict): The config dictionary containing the key value pairs pulled from the config file
         Returns:
             Raises ValueError if an empty value is found, None otherwise
         """
-        if isinstance(value, dict):
-            for k in value:
-                GFlow.check_for_empty_values(cls, value[k])
-        else:
-            if value is None:
-                cls.logger.error("Empty values in config file not allowed")
-                raise ValueError
+        for key in ['galaxy_url', 'galaxy_key', 'library_name', 'history_name', 'workflow_source', 'workflow']:
+            if config[key] is None:
+                return key
+        return None
 
     @staticmethod
-    def missing_runtime_params(workflow):
+    def verify_runtime_params(workflow):
         """
-        Check for missing runtime parameters required for workflow.
+        Check for missing runtime parameters required for workflow
 
         Args:
-            workflow (Workflow): The Workflow object containing the tool information.
+            workflow (Workflow): The Workflow object containing the tool information
         Returns:
             Name of parameter if runtime parameter is missing, None otherwise
         """
@@ -126,12 +130,12 @@ class GFlow(object):
 
     def import_workflow(self, gi):
         """
-        Import a workflow into an instance of Galaxy.
+        Import a workflow into an instance of Galaxy
 
         Args:
-            gi (GalaxyInstance): The instance of Galaxy to import the workflow to.
+            gi (GalaxyInstance): The instance of Galaxy to import the workflow to
         Returns:
-            wf (Workflow): The workflow object created.
+            wf (Workflow): The workflow object created
         """
         if self.workflow_source == 'local':
             try:
@@ -150,7 +154,7 @@ class GFlow(object):
 
     def import_data(self, library):
         """
-        Import a dataset into a library of an instance of Galaxy.
+        Import a dataset into a library of an instance of Galaxy
 
         Args:
             library (Library): The library to upload the dataset(s) to
@@ -177,12 +181,12 @@ class GFlow(object):
 
     def set_runtime_params(self, wf):
         """
-        Map the parameters of tools requiring runtime parameters to the step ID of each tool.
+        Map the parameters of tools requiring runtime parameters to the step ID of each tool
 
         Args:
             wf (Workflow): The workflow object containing the tools
         Returns:
-            params (dict): The dictionary containing the step IDs and parameters.
+            params (dict): The dictionary containing the step IDs and parameters
         """
         params = {}
         for i in range(0, len(self.runtime_params)):
@@ -198,12 +202,15 @@ class GFlow(object):
                         pass
         return params
 
-    def run_workflow(self, TEMP_WF, TEMP_LIB):
+    def run(self, temp_wf, temp_lib):
         """
-        Make the connection, set up for the workflow, then run it.
+        Make the connection, set up for the workflow, then run it
 
+        Args:
+            temp_wf (bool): Flag to determine whether the workflow should be deleted after use
+            temp_lib (bool): Flag to determine whether the library should be deleted after use
         Returns:
-             results (tuple): List of output datasets and output history if successful, None if not successful.
+             results (tuple): List of output datasets and output history if successful, None if not successful
         """
         self.logger.info("Initiating Galaxy connection")
         gi = GalaxyInstance(self.galaxy_url, self.galaxy_key)
@@ -212,7 +219,7 @@ class GFlow(object):
         workflow = self.import_workflow(gi)
         if not workflow.is_runnable:
             self.logger.error("Workflow not runnable, missing required tools")
-            raise RuntimeError
+            raise RuntimeError("Workflow not runnable, missing required tools")
 
         self.logger.info("Creating data library: '%s'" % self.library_name)
         library = gi.libraries.create(self.library_name)
@@ -232,21 +239,21 @@ class GFlow(object):
             try:
                 params = self.set_runtime_params(workflow)
             except KeyError as e:
-                self.logger.error("Missing required parameter: %s", e)
-                raise KeyError
+                self.logger.error("Missing value for required parameter: %s", e)
+                raise KeyError("Missing required parameter for: %s", e)
             self.logger.info("Initiating workflow")
             results = workflow.run(input_map, outputhist, params)
         else:
-            param = self.missing_runtime_params(workflow)
-            if param:
-                self.logger.error("Missing runtime paramter in: " + str(param))
-                raise RuntimeError
+            missing_param = self.verify_runtime_params(workflow)
+            if missing_param:
+                self.logger.error("Missing runtime parameter for: " + str(missing_param))
+                raise RuntimeError("Missing runtime parameter for: " + str(missing_param))
             self.logger.info("Initiating workflow")
             results = workflow.run(input_map, outputhist)
 
-        if TEMP_WF:
+        if temp_wf:
             gi.workflows.delete(workflow.id)
-        if TEMP_LIB:
+        if temp_lib:
             gi.libraries.delete(library.id)
 
         return results
@@ -254,6 +261,7 @@ class GFlow(object):
 if __name__ == '__main__':
     datasets = ['data/exons.bed', 'data/SNPs.bed']
     runtime_params = {'tool_0': {'param_0': {'name': 'lineNum', 'value': 10}}}
-    gflow = GFlow.from_params('http://10.117.231.27', 'd2e3a6e000eddd713a15307e3bedfd61', 'Params Library',
-                             'Params History', 'local', 'workflows/galaxy101.ga', 'local', datasets, runtime_params)
-    gflow.run_workflow()
+    gflow = GFlow.init_from_params('http://10.117.231.27', 'd2e3a6e000eddd713a15307e3bedfd61', 'Params Library',
+                                   'Params History', 'local', 'workflows/galaxy101.ga', 'local',
+                                   datasets, runtime_params)
+    gflow.run(False, False)

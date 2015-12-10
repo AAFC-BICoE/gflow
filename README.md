@@ -36,7 +36,11 @@ Tests
 A small number of data files and workflow files have been included in ``data/`` and ``workflow/`` for testing purposes.
 Execute the tests with:
 
-    $ py.test
+    $ py.test tests
+    
+Run the tests without the need to install any requirements:
+
+    $ python setup.py test
 
 Generate a code coverage report:
 

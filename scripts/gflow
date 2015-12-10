@@ -4,6 +4,7 @@
 import argparse
 import sys
 from gflow.gflow import GFlow
+from yaml import parser
 
 
 TEMP_WF = False
@@ -59,11 +60,11 @@ def print_usage(outstream):
 def main():
     configfile = parse_options()
     try:
-        gflow = GFlow.from_config_file(configfile)
-    except (ValueError, RuntimeError, KeyError):
+        gflow = GFlow.init_from_config_file(configfile)
+    except (ValueError, RuntimeError, KeyError, parser.ParserError):
         sys.exit(1)
     try:
-        gflow.run_workflow(TEMP_WF, TEMP_LIB)
+        gflow.run(TEMP_WF, TEMP_LIB)
     except (ValueError, RuntimeError, KeyError):
         sys.exit(1)
     except IOError:

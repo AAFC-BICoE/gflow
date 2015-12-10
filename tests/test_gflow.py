@@ -1,4 +1,4 @@
-from gflow.gflow import *
+from gflow.gflow import GFlow
 import pytest
 
 # @pytest.fixture
@@ -13,17 +13,17 @@ def test_config_file_with_missing_required_rejected(tmpdir):
     p.write("empty: something")
     tmp_config = str(p.dirpath() + "/tmp_config.yml")
     with pytest.raises(KeyError):
-        GFlow.from_config_file(tmp_config)
+        GFlow.init_from_config_file(tmp_config)
 
 def test_config_file_with_empty_value_rejected(tmpdir):
     p = tmpdir.mkdir("sub").join("tmp_config.yml")
-    p.write("param: ")
+    p.write("galaxy_url: ")
     tmp_config = str(p.dirpath() + "/tmp_config.yml")
     with pytest.raises(ValueError):
-        GFlow.from_config_file(tmp_config)
+        GFlow.init_from_config_file(tmp_config)
 
 def test_config_file_with_no_empty_files_accepted():
-    assert GFlow.from_config_file('tests/config/config0.yml')
+    assert GFlow.init_from_config_file('tests/config/config0.yml')
 
 # def test_error_on_no_galaxy_credentials(self, tmpdir):
 #     if 'GALAXY_URL' in os.environ:
