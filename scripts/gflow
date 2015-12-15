@@ -24,17 +24,12 @@ def parse_options():
                         help="config file with parameters")
     parser.add_argument('-w', "--tempwf", action="store_true",
                         help="do not save imported workflow to Galaxy")
-    parser.add_argument("-l", "--templib", action="store_true",
-                        help="do not save imported library to Galaxy")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="increase output verbosity")
     args = parser.parse_args()
     if args.tempwf:
         global TEMP_WF
         TEMP_WF = True
-    if args.templib:
-        global TEMP_LIB
-        TEMP_LIB = True
     if args.verbose:
         global VERBOSE
         VERBOSE = True
@@ -64,7 +59,7 @@ def main():
     except (ValueError, RuntimeError, KeyError, parser.ParserError):
         sys.exit(1)
     try:
-        gflow.run(TEMP_WF, TEMP_LIB)
+        gflow.run(TEMP_WF)
     except (ValueError, RuntimeError, KeyError):
         sys.exit(1)
     except IOError:

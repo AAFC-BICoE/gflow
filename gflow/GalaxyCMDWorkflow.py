@@ -20,7 +20,6 @@ class GalaxyCMDWorkflow(object):
             self.history_name (str): The name of the history to be created
             self.workflow_source (str): Whether the workflow's being imported from a file or with an id
             self.workflow (str): Either a filename or id for the workflow
-            self.datasets_source (str): Whether the data's being imported from files or URLs
             self.datasets (dict): A collection of filenames or URLs for the datasets
             self.runtime_params (dict): A collection of required runtime parameters
 
@@ -33,11 +32,9 @@ class GalaxyCMDWorkflow(object):
         self.workflow_source = datadict['workflow_source']
         self.workflow = datadict['workflow']
         # Optional parameters follow
-        self.datasets_source = None
         self.datasets = None
         self.runtime_params = None
         try:
-            self.datasets_source = datadict['datasets_source']
             self.datasets = datadict['datasets']
             self.runtime_params = datadict['runtime_params']
         except KeyError as e:
@@ -82,7 +79,6 @@ class GalaxyCMDWorkflow(object):
             history_name (str): The name of the history to be created
             workflow_source (str): Whether the workflow's being imported from a file or with an id
             workflow (str): Either a filename or id for the workflow
-            datasets_source (str): Whether the data's being imported from files or URLs
             datasets (List): A collection of filenames or URLs for the datasets
             runtime_params (dict): A collection of required runtime parameters
         """
@@ -152,30 +148,32 @@ class GalaxyCMDWorkflow(object):
             raise ValueError
         return wf
 
-    def import_data(self, library):
+    def import_data(self, gi, history):
         """
-        Import a dataset into a library of an instance of Galaxy
+        Upload a dataset into a history of an instance of Galaxy
 
         Args:
-            library (Library): The library to upload the dataset(s) to
-        Returns:
-            results (LibraryDataset): Dataset object that represents the uploaded content if successful,
-                                      None if not successful
+            gi (GalaxyInstance): The instance of Galaxy to import the data to
+            history (History): The history that the data will be imported to
         """
         results = None
-        self.logger.debug("Datasets source: '%s'" % self.datasets_source)
         for i in range(0, len(self.datasets)):
-            self.logger.debug("Uploading dataset: " + self.datasets[i])
-            if self.datasets_source == 'local':
+            self.logger.debug("Dataset source: '%s'" % self.datasets[i]['source'])
+            if self.datasets[i]['source'] == 'local':
+                self.logger.debug("Uploading dataset: " + self.datasets[i]['dataset_id'])
                 try:
-                    results = library.upload_from_local(self.datasets[i])
+                    results = history.upload_dataset(self.datasets[i]['dataset_id'])
                 except IOError as e:
                     self.logger.error(e)
                     raise IOError
-            elif self.datasets_source == 'url':
-                results = library.upload_from_url(self.datasets[i])  # Need a URL to test
+            elif self.datasets[i]['source'] == 'library':
+                self.logger.debug("Importing dataset: " + self.datasets[i]['dataset_id'] + " from library: " +
+                                  self.datasets[i]['library_id'])
+                lib = gi.libraries.get(self.datasets[i]['library_id'])
+                dataset = lib.get_dataset(self.datasets[i]['dataset_id'])
+                results = history.import_dataset(dataset)
             else:
-                self.logger.error("Dataset source must be local or url")
+                self.logger.error("Dataset source must be local, url, or library")
                 raise ValueError
         return results
 
@@ -202,37 +200,31 @@ class GalaxyCMDWorkflow(object):
                         pass
         return params
 
-    def run(self, temp_wf, temp_lib):
+    def run(self, temp_wf):
         """
         Make the connection, set up for the workflow, then run it
 
         Args:
             temp_wf (bool): Flag to determine whether the workflow should be deleted after use
-            temp_lib (bool): Flag to determine whether the library should be deleted after use
         Returns:
              results (tuple): List of output datasets and output history if successful, None if not successful
         """
         self.logger.info("Initiating Galaxy connection")
         gi = GalaxyInstance(self.galaxy_url, self.galaxy_key)
 
-        self.logger.info("Importing workflow from: %s", self.workflow)
+        self.logger.info("Importing workflow from: %s" % self.workflow)
         workflow = self.import_workflow(gi)
         if not workflow.is_runnable:
             self.logger.error("Workflow not runnable, missing required tools")
             raise RuntimeError("Workflow not runnable, missing required tools")
 
-        self.logger.info("Creating data library: '%s'" % self.library_name)
-        library = gi.libraries.create(self.library_name)
-
-        input_map = None
-        if self.datasets:
-            self.logger.info("Importing data")
-            self.import_data(library)
-            self.logger.info("Creating input map")
-            input_map = dict(zip(workflow.input_labels, library.get_datasets()))
-
         self.logger.info("Creating output history: '%s'" % self.history_name)
         outputhist = gi.histories.create(self.history_name)
+
+        input_map = dict()
+        if self.datasets:
+            self.import_data(gi, outputhist)
+            input_map = dict(zip(workflow.input_labels, outputhist.get_datasets()))
 
         if self.runtime_params:
             self.logger.info("Setting runtime tool parameters")
@@ -251,10 +243,8 @@ class GalaxyCMDWorkflow(object):
             self.logger.info("Initiating workflow")
             results = workflow.run(input_map, outputhist)
 
-        if temp_wf:
+        if temp_wf and self.workflow_source is not 'id':
             gi.workflows.delete(workflow.id)
-        if temp_lib:
-            gi.libraries.delete(library.id)
 
         return results
 
@@ -264,4 +254,4 @@ if __name__ == '__main__':
     gflow = GalaxyCMDWorkflow.init_from_params('http://10.117.231.27', 'd2e3a6e000eddd713a15307e3bedfd61',
                                                'Params Library', 'Params History', 'local', 'workflows/galaxy101.ga',
                                                'local', datasets, runtime_params)
-    gflow.run(False, False)
+    gflow.run(False)
