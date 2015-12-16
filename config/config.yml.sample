@@ -1,18 +1,39 @@
 ---
+# REQUIRED PARAMETERS
+
+# Galaxy credentials
 galaxy_url: <galaxy_url>
 galaxy_key: <galaxy_key>
-# local or url
-datasets_source: local
-datasets:
-  0: data/exons.bed
-  1: data/SNPs.bed
+
+# 'local' or 'id'
+workflow_source: local
+
+# Specify a file for 'local' or a Galaxy ID for 'id'
+workflow: workflows/galaxy101.ga
+
+# Any names will do
 library: "Test Library"
 history: "Test History"
+
+# OPTIONAL PARAMETERS
+
+datasets:
+  0:
+    # If source is 'local' then a 'dataset_file' parameter must be provided as well
+    source: local
+    dataset_file: data/exons.bed
+  1:
+    # If source is 'library' then 'library_id' and 'dataset_id' parameters must also be provided
+    source: library
+    library_id: <library_id>
+    dataset_id: <dataset_id>
+
+# Only for workflows that require them
 runtime_params:
+  # From 0 to n tools that require runtime parameters
   tool_0:
+    # From 0 to m parameters for this tool
     param_0:
+      # Name must be determined from the workflow file
       name: lineNum
       value: 10
-# local or id
-workflow_source: local
-workflow: workflows/galaxy101.ga
