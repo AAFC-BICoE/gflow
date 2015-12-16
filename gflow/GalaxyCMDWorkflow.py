@@ -158,16 +158,16 @@ class GalaxyCMDWorkflow(object):
         """
         results = None
         for i in range(0, len(self.datasets)):
-            self.logger.debug("Dataset source: '%s'" % self.datasets[i]['source'])
+            self.logger.info("Dataset %d source: '%s'", i, self.datasets[i]['source'])
             if self.datasets[i]['source'] == 'local':
-                self.logger.debug("Uploading dataset: " + self.datasets[i]['dataset_id'])
+                self.logger.info("Uploading dataset: " + self.datasets[i]['dataset_id'])
                 try:
                     results = history.upload_dataset(self.datasets[i]['dataset_id'])
                 except IOError as e:
                     self.logger.error(e)
                     raise IOError
             elif self.datasets[i]['source'] == 'library':
-                self.logger.debug("Importing dataset: " + self.datasets[i]['dataset_id'] + " from library: " +
+                self.logger.info("Importing dataset: " + self.datasets[i]['dataset_id'] + " from library: " +
                                   self.datasets[i]['library_id'])
                 lib = gi.libraries.get(self.datasets[i]['library_id'])
                 dataset = lib.get_dataset(self.datasets[i]['dataset_id'])
@@ -212,6 +212,7 @@ class GalaxyCMDWorkflow(object):
         self.logger.info("Initiating Galaxy connection")
         gi = GalaxyInstance(self.galaxy_url, self.galaxy_key)
 
+        self.logger.info("Workflow source: %s" % self.workflow_source)
         self.logger.info("Importing workflow from: %s" % self.workflow)
         workflow = self.import_workflow(gi)
         if not workflow.is_runnable:
@@ -223,6 +224,7 @@ class GalaxyCMDWorkflow(object):
 
         input_map = dict()
         if self.datasets:
+            self.logger.info("Importing datsets to history")
             self.import_data(gi, outputhist)
             input_map = dict(zip(workflow.input_labels, outputhist.get_datasets()))
 

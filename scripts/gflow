@@ -3,13 +3,15 @@
 
 import argparse
 import sys
+import logging
+import logging.config
 from gflow.GalaxyCMDWorkflow import GalaxyCMDWorkflow
 from yaml import parser
 
+logging.config.fileConfig('config/logging.ini')
+
 
 TEMP_WF = False
-TEMP_LIB = False
-VERBOSE = False
 
 
 def parse_options():
@@ -31,8 +33,12 @@ def parse_options():
         global TEMP_WF
         TEMP_WF = True
     if args.verbose:
-        global VERBOSE
-        VERBOSE = True
+        logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        ch_formatter = logging.Formatter('%(name)s - %(levelname)s: %(message)s')
+        ch.setFormatter(ch_formatter)
+        logger.addHandler(ch)
     return args.configfile
 
 
