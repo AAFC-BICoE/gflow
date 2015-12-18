@@ -8,7 +8,7 @@ import logging.config
 from gflow.GalaxyCMDWorkflow import GalaxyCMDWorkflow
 from yaml import parser
 
-logging.config.fileConfig('config/logging.ini')
+logging.config.fileConfig('logging.ini')
 
 
 TEMP_WF = False
