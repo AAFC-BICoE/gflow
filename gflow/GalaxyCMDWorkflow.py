@@ -3,6 +3,10 @@ import logging
 import yaml
 from yaml import parser
 from bioblend.galaxy.objects import GalaxyInstance
+from bioblend.galaxy import dataset_collections as collections
+from bioblend.galaxy.histories import HistoryClient
+import bioblend.galaxy.dataset_collections
+from bioblend.galaxy import GalaxyInstance as GalInst
 
 
 class GalaxyCMDWorkflow(object):
@@ -223,11 +227,37 @@ class GalaxyCMDWorkflow(object):
         self.logger.info("Creating output history: '%s'" % self.history_name)
         outputhist = gi.histories.create(self.history_name)
 
-        input_map = dict()
-        if self.datasets:
-            self.logger.info("Importing datsets to history")
-            self.import_data(gi, outputhist)
-            input_map = dict(zip(workflow.input_labels, outputhist.get_datasets()))
+        #input_map = dict()
+        galaxy = GalInst(url=self.galaxy_url, key=self.galaxy_key)
+        # if self.datasets:
+        self.logger.info("Importing datsets to history")
+        datasets = self.import_data(gi, outputhist)
+        history_id = outputhist.id
+        dataset1_id = datasets[1].id
+        dataset2_id = datasets[2].id
+        histClient = HistoryClient(galaxy_instance=galaxy)
+        # noinspection PyTypeChecker
+        collection = histClient.create_dataset_collection(
+            history_id=history_id,
+            collection_description=collections.CollectionDescription(
+                name="MyDatasetList",
+                elements=[
+                    collections.HistoryDatasetElement(name="sample1", id=dataset1_id),
+                    collections.HistoryDatasetElement(name="sample2", id=dataset2_id),
+                ]
+            )
+        )
+        print "dataset: " + str(datasets[0])
+        print "collection: " + str(collection)
+        newDict = [datasets[0], collection]
+        input_map = dict(zip(workflow.input_labels, newDict))
+        print "input_map: " + str(input_map)
+
+        # input1 = galaxy.workflows.get_workflow_inputs(workflow.id, label='1 Query Sequence')[0]
+        # input2 = galaxy.workflows.get_workflow_inputs(workflow.id, label='2 FASTQ Files')[0]
+        # datamap = dict()
+        # datamap['1 Query Sequence'] = {'src': 'hda', 'id': datasets[0].id}
+        # datamap['2 FASTQ Files'] = {'src': 'hda', 'id': collection['id']}
 
         if self.runtime_params:
             self.logger.info("Setting runtime tool parameters")
@@ -237,13 +267,19 @@ class GalaxyCMDWorkflow(object):
                 self.logger.error("Missing value for required parameter: %s", e)
                 raise KeyError("Missing required parameter for: %s", e)
             self.logger.info("Initiating workflow")
-            results = workflow.run(input_map, outputhist, params)
+            results = workflow.run(datamap, outputhist, params)
         else:
             missing_param = self.verify_runtime_params(workflow)
             if missing_param:
                 self.logger.error("Missing runtime parameter for: " + str(missing_param))
                 raise RuntimeError("Missing runtime parameter for: " + str(missing_param))
             self.logger.info("Initiating workflow")
+            # print datasets[0]
+            # print datamap
+            # print outputhist.get_datasets
+            # print workflow.input_labels
+            # datas = outputhist.get_datasets()
+            # print len(datas)
             results = workflow.run(input_map, outputhist)
 
         if temp_wf and self.workflow_source is not 'id':
