@@ -24,7 +24,6 @@ def test_config_file_with_no_empty_files_accepted(tmpdir):
     p = tmpdir.mkdir("sub").join("tmp_config.yml")
     p.write("galaxy_url: something\n"
             "galaxy_key: something\n"
-            "library_name: something\n"
             "history_name: something\n"
             "workflow_source: something\n"
             "workflow: something\n")
@@ -32,7 +31,6 @@ def test_config_file_with_no_empty_files_accepted(tmpdir):
     gflow = GalaxyCMDWorkflow.init_from_config_file(tmp_config)
     assert gflow.galaxy_url == "something"
     assert gflow.galaxy_key == "something"
-    assert gflow.library_name == "something"
     assert gflow.history_name == "something"
     assert gflow.workflow_source == "something"
     assert gflow.workflow == "something"
