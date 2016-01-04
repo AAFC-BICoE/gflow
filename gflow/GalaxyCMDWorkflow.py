@@ -22,7 +22,6 @@ class GalaxyCMDWorkflow(object):
             self.workflow (str): Either a filename or id for the workflow
             self.datasets (dict): A collection of filenames or URLs for the datasets
             self.runtime_params (dict): A collection of required runtime parameters
-
         """
         self.logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
         self.galaxy_url = datadict['galaxy_url']
@@ -57,10 +56,10 @@ class GalaxyCMDWorkflow(object):
             cls.logger.error("Incorrect yaml syntax in config file")
             raise parser.ParserError
         try:
-            missing = GalaxyCMDWorkflow.verify_config_file(config)
-            if missing:
-                cls.logger.error("Missing value for required parameter: " + missing)
-                raise ValueError("Missing value for required parameter: " + missing)
+            missing_var = GalaxyCMDWorkflow.verify_config_file(config)
+            if missing_var:
+                cls.logger.error("Missing value for required parameter: " + missing_var)
+                raise ValueError("Missing value for required parameter: " + missing_var)
         except KeyError as e:
             cls.logger.error("Missing required parameter: " + str(e))
             raise KeyError("Missing required parameter: " + str(e))
@@ -92,7 +91,7 @@ class GalaxyCMDWorkflow(object):
     @staticmethod
     def verify_config_file(config):
         """
-        Make sure no values are missing from the config file
+        Make sure no values of required parameters are missing from the config file
 
         Args:
             config (dict): The config dictionary containing the key value pairs pulled from the config file
@@ -144,8 +143,8 @@ class GalaxyCMDWorkflow(object):
         elif self.workflow_source == 'id':
             wf = gi.workflows.get(self.workflow)
         else:
-            self.logger.error("Workflow source must be local, workflow, or shared")
-            raise ValueError
+            self.logger.error("Workflow source must be either 'local' or 'id'")
+            raise ValueError("Workflow source must be either 'local' or 'id'")
         return wf
 
     def import_data(self, gi, history):
@@ -155,14 +154,16 @@ class GalaxyCMDWorkflow(object):
         Args:
             gi (GalaxyInstance): The instance of Galaxy to import the data to
             history (History): The history that the data will be imported to
+        Returns:
+            results (List): List of datasets imported into the history
         """
-        results = None
+        results = []
         for i in range(0, len(self.datasets)):
             self.logger.info("Dataset %d source: '%s'", i, self.datasets[i]['source'])
             if self.datasets[i]['source'] == 'local':
                 self.logger.info("Uploading dataset: " + self.datasets[i]['dataset_id'])
                 try:
-                    results = history.upload_dataset(self.datasets[i]['dataset_id'])
+                    results.append(history.upload_dataset(self.datasets[i]['dataset_id']))
                 except IOError as e:
                     self.logger.error(e)
                     raise IOError
@@ -171,9 +172,9 @@ class GalaxyCMDWorkflow(object):
                                   self.datasets[i]['library_id'])
                 lib = gi.libraries.get(self.datasets[i]['library_id'])
                 dataset = lib.get_dataset(self.datasets[i]['dataset_id'])
-                results = history.import_dataset(dataset)
+                results.append(history.import_dataset(dataset))
             else:
-                self.logger.error("Dataset source must be local, url, or library")
+                self.logger.error("Dataset source must be either 'local' or 'library'")
                 raise ValueError
         return results
 
@@ -250,6 +251,7 @@ class GalaxyCMDWorkflow(object):
 
         return results
 
+# Test for making GFlow object with params
 if __name__ == '__main__':
     datasets = ['data/exons.bed', 'data/SNPs.bed']
     runtime_params = {'tool_0': {'param_0': {'name': 'lineNum', 'value': 10}}}
