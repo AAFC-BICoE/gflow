@@ -5,6 +5,7 @@ import argparse
 import sys
 import logging
 import logging.config
+
 from gflow.GalaxyCMDWorkflow import GalaxyCMDWorkflow
 from yaml import parser
 
