@@ -18,7 +18,6 @@ class GalaxyCMDWorkflow(object):
             self.logger: For logging.
             self.galaxy_url (str): The URL of an instance of Galaxy
             self.galaxy_key (str): The API key of an instance of Galaxy
-            self.library_name (str): The name of the library to be created
             self.history_name (str): The name of the history to be created
             self.workflow_source (str): Whether the workflow's being imported from a file or with an id
             self.workflow (str): Either a filename or id for the workflow
@@ -28,16 +27,17 @@ class GalaxyCMDWorkflow(object):
         self.logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
         self.galaxy_url = datadict['galaxy_url']
         self.galaxy_key = datadict['galaxy_key']
-        self.library_name = datadict['library_name']
         self.history_name = datadict['history_name']
         self.workflow_source = datadict['workflow_source']
         self.workflow = datadict['workflow']
         # Optional parameters follow
         self.datasets = None
         self.runtime_params = None
+        self.library_name = None
         try:
             self.datasets = datadict['datasets']
             self.runtime_params = datadict['runtime_params']
+            self.library_name = datadict['library_name']
         except KeyError as e:
             self.logger.warning("%s parameter(s) not set", e)
 
@@ -100,7 +100,7 @@ class GalaxyCMDWorkflow(object):
         Returns:
             Raises ValueError if an empty value is found, None otherwise
         """
-        for key in ['galaxy_url', 'galaxy_key', 'library_name', 'history_name', 'workflow_source', 'workflow']:
+        for key in ['galaxy_url', 'galaxy_key', 'history_name', 'workflow_source', 'workflow']:
             if config[key] is None:
                 return key
         return None
@@ -241,6 +241,11 @@ class GalaxyCMDWorkflow(object):
             dataset_collection = outputhist.new_dataset_collection(collection_description)
             newDict = [datasets[0], dataset_collection]
             input_map = dict(zip(workflow.input_labels, newDict))
+
+        if self.library_name:
+            lib = gi.libraries.create(self.library_name)
+            for data in outputhist.get_datasets():
+                lib.copy_from_dataset(data)
 
         if self.runtime_params:
             self.logger.info("Setting runtime tool parameters")

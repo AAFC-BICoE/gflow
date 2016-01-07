@@ -11,11 +11,13 @@ workflow_source: local
 # Specify a file for 'local' or a Galaxy ID for 'id'
 workflow: workflows/galaxy101.ga
 
-# Any names will do
-library: "Test Library"
-history: "Test History"
+# Any name will do
+history_name: "Test History"
 
 # OPTIONAL PARAMETERS
+
+# If a library name is provided a new library will be created and all data used in the workflow will be copied to it
+library_name: "Test Library"
 
 datasets:
   0:
