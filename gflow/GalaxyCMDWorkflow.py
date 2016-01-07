@@ -21,8 +21,10 @@ class GalaxyCMDWorkflow(object):
             self.history_name (str): The name of the history to be created
             self.workflow_source (str): Whether the workflow's being imported from a file or with an id
             self.workflow (str): Either a filename or id for the workflow
+            self.dataset_collection (dict): A list of datasets to make a dataset collection with
             self.datasets (dict): A collection of filenames or URLs for the datasets
             self.runtime_params (dict): A collection of required runtime parameters
+            self.library_name (str): The name of the library to be created
         """
         self.logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
         self.galaxy_url = datadict['galaxy_url']
@@ -31,10 +33,12 @@ class GalaxyCMDWorkflow(object):
         self.workflow_source = datadict['workflow_source']
         self.workflow = datadict['workflow']
         # Optional parameters follow
+        self.dataset_collection = None
         self.datasets = None
         self.runtime_params = None
         self.library_name = None
         try:
+            self.dataset_collection = datadict['dataset_collection']
             self.datasets = datadict['datasets']
             self.runtime_params = datadict['runtime_params']
             self.library_name = datadict['library_name']
@@ -68,26 +72,28 @@ class GalaxyCMDWorkflow(object):
         return cls(config)
 
     @classmethod
-    def init_from_params(cls, galaxy_url=None, galaxy_key=None, library_name=None, history_name=None,
-                         workflow_source=None, workflow=None, datasets_source=None, datasets=None, runtime_params=None):
+    def init_from_params(cls, galaxy_url=None, galaxy_key=None, history_name=None, workflow_source=None, workflow=None,
+                         dataset_collection=None, datasets=None, runtime_params=None, library_name=None):
         """
         Makes GFlow object from provided parameters
 
         Args:
             galaxy_url (str): The URL of an instance of Galaxy
             galaxy_key (str): The API key of an instance of Galaxy
-            library_name (str): The name of the library to be created
             history_name (str): The name of the history to be created
             workflow_source (str): Whether the workflow's being imported from a file or with an id
             workflow (str): Either a filename or id for the workflow
-            datasets (List): A collection of filenames or URLs for the datasets
+            dataset_collection (dict): A list of datasets to make a dataset collection with
+            datasets (dict): A collection of filenames or URLs for the datasets
             runtime_params (dict): A collection of required runtime parameters
+            library_name (str): The name of the library to be created
         """
         cls.logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
         cls.logger.info("Reading from parameters")
-        config = {'galaxy_url': galaxy_url, 'galaxy_key': galaxy_key, 'library_name': library_name,
+        config = {'galaxy_url': galaxy_url, 'galaxy_key': galaxy_key,
                   'history_name': history_name, 'workflow_source': workflow_source, 'workflow': workflow,
-                  'datasets_source': datasets_source, 'datasets': datasets, 'runtime_params': runtime_params}
+                  'dataset_collection': dataset_collection, 'datasets': datasets, 'runtime_params': runtime_params,
+                  'library_name': library_name}
         return cls(config)
 
     @staticmethod
@@ -149,7 +155,7 @@ class GalaxyCMDWorkflow(object):
             raise ValueError("Workflow source must be either 'local' or 'id'")
         return wf
 
-    def import_data(self, gi, history):
+    def import_data(self, dataset_num, data_type, gi, history):
         """
         Upload a dataset into a history of an instance of Galaxy
 
@@ -159,26 +165,30 @@ class GalaxyCMDWorkflow(object):
         Returns:
             results (List): List of datasets imported into the history
         """
-        results = []
-        for i in range(0, len(self.datasets)):
-            self.logger.info("Dataset %d source: '%s'", i, self.datasets[i]['source'])
-            if self.datasets[i]['source'] == 'local':
-                self.logger.info("Uploading dataset: " + self.datasets[i]['dataset_id'])
-                try:
-                    results.append(history.upload_dataset(self.datasets[i]['dataset_id']))
-                except IOError as e:
-                    self.logger.error(e)
-                    raise IOError
-            elif self.datasets[i]['source'] == 'library':
-                self.logger.info("Importing dataset: " + self.datasets[i]['dataset_id'] + " from library: " +
-                                  self.datasets[i]['library_id'])
-                lib = gi.libraries.get(self.datasets[i]['library_id'])
-                dataset = lib.get_dataset(self.datasets[i]['dataset_id'])
-                results.append(history.import_dataset(dataset))
-            else:
-                self.logger.error("Dataset source must be either 'local' or 'library'")
-                raise ValueError
-        return results
+        if data_type == 'dataset':
+            datasets = self.datasets
+        elif data_type == 'dataset_collection':
+            datasets = self.dataset_collection
+        else:
+            datasets = None
+        self.logger.info("Dataset %d source: '%s'", dataset_num, datasets[dataset_num]['source'])
+        if datasets[dataset_num]['source'] == 'local':
+            self.logger.info("Uploading dataset: " + datasets[dataset_num]['dataset_id'])
+            try:
+                dataset = history.upload_dataset(datasets[dataset_num]['dataset_id'])
+            except IOError as e:
+                self.logger.error(e)
+                raise IOError
+        elif datasets[dataset_num]['source'] == 'library':
+            self.logger.info("Importing dataset: " + datasets[dataset_num]['dataset_id'] + " from library: " +
+                              datasets[dataset_num]['library_id'])
+            lib = gi.libraries.get(datasets[dataset_num]['library_id'])
+            lib_dataset = lib.get_dataset(datasets[dataset_num]['dataset_id'])
+            dataset = history.import_dataset(lib_dataset)
+        else:
+            self.logger.error("Dataset source must be either 'local' or 'library'")
+            raise ValueError
+        return dataset
 
     def set_runtime_params(self, wf):
         """
@@ -203,6 +213,20 @@ class GalaxyCMDWorkflow(object):
                         pass
         return params
 
+    def create_dataset_collection(self, gi, outputhist):
+        datasets = []
+        collection_elements = []
+        for dataset_num in range(0, len(self.dataset_collection)):
+            datasets.append(self.import_data(dataset_num, 'dataset_collection', gi, outputhist))
+            collection_elements.append(collections.HistoryDatasetElement(name=datasets[dataset_num].name,
+                                                                         id=datasets[dataset_num].id))
+        collection_description = collections.CollectionDescription(
+                name="MyDatasetList",
+                elements=collection_elements
+            )
+        dataset_collection = outputhist.new_dataset_collection(collection_description)
+        return dataset_collection
+
     def run(self, temp_wf):
         """
         Make the connection, set up for the workflow, then run it
@@ -226,21 +250,21 @@ class GalaxyCMDWorkflow(object):
         outputhist = gi.histories.create(self.history_name)
 
         input_map = dict
+
+        if self.dataset_collection:
+            self.logger.info("Creating dataset collection")
+            collection = self.create_dataset_collection(gi, outputhist)
+
+        datasets = []
         if self.datasets:
             self.logger.info("Importing datsets to history")
-            datasets = self.import_data(gi, outputhist)
-            dataset1_id = datasets[1].id
-            dataset2_id = datasets[2].id
-            collection_description = collections.CollectionDescription(
-                    name="MyDatasetList",
-                    elements=[
-                        collections.HistoryDatasetElement(name="sample1", id=dataset1_id),
-                        collections.HistoryDatasetElement(name="sample2", id=dataset2_id),
-                    ]
-                )
-            dataset_collection = outputhist.new_dataset_collection(collection_description)
-            newDict = [datasets[0], dataset_collection]
-            input_map = dict(zip(workflow.input_labels, newDict))
+            for dataset_num in range(0, len(self.datasets)):
+                datasets.append(self.import_data(dataset_num, 'dataset', gi, outputhist))
+
+        newDict = [datasets[0], collection]
+        print workflow.input_labels
+        print newDict
+        input_map = dict(zip(workflow.input_labels, newDict))
 
         if self.library_name:
             lib = gi.libraries.create(self.library_name)
@@ -255,7 +279,7 @@ class GalaxyCMDWorkflow(object):
                 self.logger.error("Missing value for required parameter: %s", e)
                 raise KeyError("Missing required parameter for: %s", e)
             self.logger.info("Initiating workflow")
-            results = workflow.run(datamap, outputhist, params)
+            results = workflow.run(input_map, outputhist, params)
         else:
             missing_param = self.verify_runtime_params(workflow)
             if missing_param:
