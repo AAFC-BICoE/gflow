@@ -26,7 +26,7 @@ def parse_options():
     parser.add_argument("configfile", type=str,
                         help="config file with parameters")
     parser.add_argument('-w', "--tempwf", action="store_true",
-                        help="do not save imported workflow to Galaxy")
+                        help="do not save imported workflow from file to Galaxy")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="increase output verbosity")
     args = parser.parse_args()

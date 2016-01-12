@@ -28,7 +28,7 @@ history_name: "Test History"
 #       dataset_id: <dataset_id>
 #     1:
 #       source: local
-#       dataset_id: <dataset_id>
+#       dataset_file: <dataset_file>
 
 # datasets:
 #   0:
@@ -44,7 +44,7 @@ history_name: "Test History"
 # runtime_params:
     # From 0 to n tools that require runtime parameters
 #   tool_0:
-#     # From 0 to m parameters for this tool
+      # From 0 to m parameters for this tool
 #     param_0:
         # Name must be determined from the workflow file
 #       name: lineNum

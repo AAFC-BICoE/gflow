@@ -175,10 +175,10 @@ class GalaxyCMDWorkflow(object):
         results = []
         for i in range(0, len(datasets)):
             if datasets[i]['source'] == 'local':
-                self.logger.info("Importing dataset: '%s' from file: '%s'", datasets[i]['dataset_id'],
-                                 datasets[i]['dataset_id'])
+                self.logger.info("Importing dataset: '%s' from file: '%s'", datasets[i]['dataset_file'],
+                                 datasets[i]['dataset_file'])
                 try:
-                    results.append(history.upload_dataset(datasets[i]['dataset_id']))
+                    results.append(history.upload_dataset(datasets[i]['dataset_file']))
                 except IOError as e:
                     self.logger.error(e)
                     raise IOError
@@ -247,7 +247,7 @@ class GalaxyCMDWorkflow(object):
         Args:
             temp_wf (bool): Flag to determine whether the workflow should be deleted after use
         Returns:
-             results (tuple): List of output datasets and output history if successful, None if not successful
+            results (tuple): List of output datasets and output history if successful, None if not successful
         """
         self.logger.info("Initiating Galaxy connection")
         gi = GalaxyInstance(self.galaxy_url, self.galaxy_key)
