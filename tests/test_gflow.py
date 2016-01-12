@@ -11,7 +11,7 @@ def test_config_file_missing_required_parameter_is_rejected(tmpdir):
     assert 'Missing required parameter: \'galaxy_url\'' in str(excinfo.value)
 
 
-def test_config_file_with_empty_value_for_required_param_is_rejected(tmpdir):
+def test_config_file_missing_value_for_required_param_is_rejected(tmpdir):
     p = tmpdir.mkdir("sub").join("tmp_config.yml")
     p.write("galaxy_url: ")
     tmp_config = str(p.dirpath() + "/tmp_config.yml")
@@ -20,7 +20,7 @@ def test_config_file_with_empty_value_for_required_param_is_rejected(tmpdir):
     assert 'Missing value for required parameter: galaxy_url' in str(excinfo.value)
 
 
-def test_config_file_with_no_empty_files_accepted(tmpdir):
+def test_config_file_with_all_required_values_is_accepted(tmpdir):
     p = tmpdir.mkdir("sub").join("tmp_config.yml")
     p.write("galaxy_url: something\n"
             "galaxy_key: something\n"

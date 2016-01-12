@@ -64,7 +64,7 @@ def main():
     try:
         gflow = GalaxyCMDWorkflow.init_from_config_file(configfile)
     except (ValueError, RuntimeError, KeyError, parser.ParserError):
-        sys.exit(1)
+       sys.exit(1)
     try:
         gflow.run(TEMP_WF)
     except (ValueError, RuntimeError, KeyError):

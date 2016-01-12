@@ -37,13 +37,25 @@ class GalaxyCMDWorkflow(object):
         self.datasets = None
         self.runtime_params = None
         self.library_name = None
+        unset_params = []
         try:
             self.dataset_collection = datadict['dataset_collection']
+        except KeyError as e:
+            unset_params.append('dataset_collection')
+        try:
             self.datasets = datadict['datasets']
+        except KeyError as e:
+            unset_params.append('datasets')
+        try:
             self.runtime_params = datadict['runtime_params']
+        except KeyError as e:
+            unset_params.append('runtime_params')
+        try:
             self.library_name = datadict['library_name']
         except KeyError as e:
-            self.logger.warning("%s parameter(s) not set", e)
+            unset_params.append('library_name')
+        self.logger.warning("Parameter(s) not set: " + str(unset_params))
+
 
     @classmethod
     def init_from_config_file(cls, configfile):
@@ -175,8 +187,7 @@ class GalaxyCMDWorkflow(object):
         results = []
         for i in range(0, len(datasets)):
             if datasets[i]['source'] == 'local':
-                self.logger.info("Importing dataset: '%s' from file: '%s'", datasets[i]['dataset_file'],
-                                 datasets[i]['dataset_file'])
+                self.logger.info("Importing dataset from file: '%s'", datasets[i]['dataset_file'])
                 try:
                     results.append(history.upload_dataset(datasets[i]['dataset_file']))
                 except IOError as e:
@@ -252,13 +263,13 @@ class GalaxyCMDWorkflow(object):
         self.logger.info("Initiating Galaxy connection")
         gi = GalaxyInstance(self.galaxy_url, self.galaxy_key)
 
-        self.logger.info("Importing workflow: '%s' from: '%s'", self.workflow, self.workflow_source)
+        self.logger.info("Importing workflow '%s' from '%s' source", self.workflow, self.workflow_source)
         workflow = self.import_workflow(gi)
         if not workflow.is_runnable:
             self.logger.error("Workflow not runnable, missing required tools")
             raise RuntimeError("Workflow not runnable, missing required tools")
 
-        self.logger.info("Creating output history: '%s'" % self.history_name)
+        self.logger.info("Creating output history '%s'", self.history_name)
         outputhist = gi.histories.create(self.history_name)
 
         input_map = {}
@@ -275,9 +286,9 @@ class GalaxyCMDWorkflow(object):
                 input_map[self.datasets[i]['input_label']] = imported_datasets[i]
 
         if self.library_name:
-            self.logger.info("Creating library: " + self.library_name)
+            self.logger.info("Creating library '%s'", self.library_name)
             lib = gi.libraries.create(self.library_name)
-            self.logger("Copying datasets to library: " + self.library_name)
+            self.logger("Copying datasets to library '%s'", self.library_name)
             for data in outputhist.get_datasets():
                 lib.copy_from_dataset(data)
 
@@ -286,16 +297,16 @@ class GalaxyCMDWorkflow(object):
             try:
                 params = self.set_runtime_params(workflow)
             except KeyError as e:
-                self.logger.error("Missing value for required parameter: '%s'", e)
-                raise KeyError("Missing required parameter for: '%s'", e)
+                self.logger.error("Missing value for required parameter '%s'", e)
+                raise KeyError("Missing value for required parameter '%s'", e)
             self.logger.info("Initiating workflow")
             results = workflow.run(input_map, outputhist, params)
         else:
             self.logger.info("Checking for missing tool parameters")
             missing_param = self.verify_runtime_params(workflow)
             if missing_param:
-                self.logger.error("Missing runtime parameter for: " + str(missing_param))
-                raise RuntimeError("Missing runtime parameter for: " + str(missing_param))
+                self.logger.error("Missing runtime parameter for '%s'", str(missing_param))
+                raise RuntimeError("Missing runtime parameter for '%s'", str(missing_param))
             self.logger.info("Initiating workflow")
             results = workflow.run(input_map, outputhist)
 

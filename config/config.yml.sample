@@ -9,15 +9,15 @@ galaxy_key: <galaxy_key>
 workflow_source: local
 
 # Specify a file for 'local' or a Galaxy ID for 'id'
-workflow: workflows/galaxy101.ga
+workflow: <workflow>
 
 # Any name will do
-history_name: "Test History"
+history_name: <history_name>
 
 # OPTIONAL PARAMETERS
 
 # If a library name is provided a new library will be created and all data used in the workflow will be copied to it
-# library_name: "Test Library"
+# library_name: <library_name>
 
 # dataset_collection:
 #   input_label: <some_label>
@@ -34,12 +34,14 @@ history_name: "Test History"
 #   0:
       # If source is 'local' then a 'dataset_file' parameter must be provided as well
 #     source: local
-#     dataset_file: data/exons.bed
+#     dataset_file: <dataset_file>
+#     input_label: <input_label>
 #   1:
       # If source is 'library' then 'library_id' and 'dataset_id' parameters must also be provided
 #     source: library
 #     library_id: <library_id>
 #     dataset_id: <dataset_id>
+#     input_label: <input_label>
 
 # runtime_params:
     # From 0 to n tools that require runtime parameters
@@ -47,5 +49,5 @@ history_name: "Test History"
       # From 0 to m parameters for this tool
 #     param_0:
         # Name must be determined from the workflow file
-#       name: lineNum
-#       value: 10
+#       name: <some_name>
+#       value: <some_value>
