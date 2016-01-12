@@ -76,15 +76,15 @@ class GalaxyCMDWorkflow(object):
         try:
             missing_var = GalaxyCMDWorkflow.verify_config_file(config)
             if missing_var:
-                cls.logger.error("Missing value for required parameter: " + missing_var)
-                raise ValueError("Missing value for required parameter: " + missing_var)
+                cls.logger.error("Missing value for required parameter '%s'" % missing_var)
+                raise ValueError("Missing value for required parameter '%s'" % missing_var)
         except KeyError as e:
-            cls.logger.error("Missing required parameter: " + str(e))
-            raise KeyError("Missing required parameter: " + str(e))
+            cls.logger.error("Missing required parameter %s" % str(e))
+            raise KeyError("Missing required parameter %s" % str(e))
         return cls(config)
 
     @classmethod
-    def init_from_params(cls, galaxy_url=None, galaxy_key=None, history_name=None, workflow_source=None, workflow=None,
+    def init_from_params(cls, galaxy_url, galaxy_key, history_name, workflow_source, workflow,
                          dataset_collection=None, datasets=None, runtime_params=None, library_name=None):
         """
         Makes GFlow object from provided parameters
@@ -159,7 +159,7 @@ class GalaxyCMDWorkflow(object):
                 wf = gi.workflows.import_new(workflow)
             except IOError as e:
                 self.logger.error(e)
-                raise IOError
+                raise IOError(e)
         elif self.workflow_source == 'id':
             wf = gi.workflows.get(self.workflow)
         else:
