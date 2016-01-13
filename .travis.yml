@@ -2,20 +2,20 @@ sudo: false
 language: python
 python:
   - "2.7"
-env:
-  - TOX_ENV=py34 GALAXY_VERSION=dev
-  - TOX_ENV=py33 GALAXY_VERSION=dev
-  - TOX_ENV=py27 GALAXY_VERSION=dev
-  - TOX_ENV=py27 GALAXY_VERSION=release_15.07
-  - TOX_ENV=py27 GALAXY_VERSION=release_15.05
-  - TOX_ENV=py27 GALAXY_VERSION=release_15.03
-  - TOX_ENV=py27 GALAXY_VERSION=release_15.01
-  - TOX_ENV=py27 GALAXY_VERSION=release_14.10
-  - TOX_ENV=py27 GALAXY_VERSION=release_14.08
-  - TOX_ENV=py27 GALAXY_VERSION=release_14.06
-  - TOX_ENV=py27 GALAXY_VERSION=release_14.04
-  - TOX_ENV=py27 GALAXY_VERSION=release_14.02
-  - TOX_ENV=py26 GALAXY_VERSION=dev
+# env:
+#  - TOX_ENV=py34 GALAXY_VERSION=dev
+#  - TOX_ENV=py33 GALAXY_VERSION=dev
+#  - TOX_ENV=py27 GALAXY_VERSION=dev
+#  - TOX_ENV=py27 GALAXY_VERSION=release_15.07
+#  - TOX_ENV=py27 GALAXY_VERSION=release_15.05
+#  - TOX_ENV=py27 GALAXY_VERSION=release_15.03
+#  - TOX_ENV=py27 GALAXY_VERSION=release_15.01
+#  - TOX_ENV=py27 GALAXY_VERSION=release_14.10
+#  - TOX_ENV=py27 GALAXY_VERSION=release_14.08
+#  - TOX_ENV=py27 GALAXY_VERSION=release_14.06
+#  - TOX_ENV=py27 GALAXY_VERSION=release_14.04
+#  - TOX_ENV=py27 GALAXY_VERSION=release_14.02
+#  - TOX_ENV=py26 GALAXY_VERSION=dev
 
 install:
   - pip install -r requirements.txt
@@ -58,5 +58,5 @@ before_script:
   - echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $GALAXY_API_KEY"
 
 script:
-  # Run nosetests through setuptools, so it will install test depedencies
+  # Run nosetests through setuptools, so it will install test dependencies
   - cd $TRAVIS_BUILD_DIR && py.test
