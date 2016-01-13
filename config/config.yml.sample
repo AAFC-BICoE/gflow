@@ -1,22 +1,23 @@
 ---
-# REQUIRED PARAMETERS
+### REQUIRED PARAMETERS
 
-# Galaxy credentials
+### Galaxy credentials
 galaxy_url: <galaxy_url>
 galaxy_key: <galaxy_key>
 
-# 'local' or 'id'
+### 'local' or 'id'
 workflow_source: local
 
-# Specify a file for 'local' or a Galaxy ID for 'id'
+### Specify a file for 'local' or a Galaxy ID for 'id'
+### If using an ID, it can be copied from the URL when viewing the worklflow in the Galaxy web interface
 workflow: <workflow>
 
-# Any name will do
+### Any name will do
 history_name: <history_name>
 
-# OPTIONAL PARAMETERS
+### OPTIONAL PARAMETERS
 
-# If a library name is provided a new library will be created and all data used in the workflow will be copied to it
+### If a library name is provided a new library will be created and all data used in the workflow will be copied to it
 # library_name: <library_name>
 
 # dataset_collection:
@@ -24,6 +25,7 @@ history_name: <history_name>
 #   datasets:
 #     0:
 #       source: library
+        ### These IDs can be copied from the URLs of the library and dataset in the Galaxy web interface
 #       library_id: <library_id>
 #       dataset_id: <dataset_id>
 #     1:
@@ -32,22 +34,22 @@ history_name: <history_name>
 
 # datasets:
 #   0:
-      # If source is 'local' then a 'dataset_file' parameter must be provided as well
+      ### If source is 'local' then a 'dataset_file' parameter must be provided as well
 #     source: local
 #     dataset_file: <dataset_file>
 #     input_label: <input_label>
 #   1:
-      # If source is 'library' then 'library_id' and 'dataset_id' parameters must also be provided
+      ### If source is 'library' then 'library_id' and 'dataset_id' parameters must also be provided
 #     source: library
 #     library_id: <library_id>
 #     dataset_id: <dataset_id>
 #     input_label: <input_label>
 
 # runtime_params:
-    # From 0 to n tools that require runtime parameters
+    ### From tool_0 to tool_n for tools that require runtime parameters
 #   tool_0:
-      # From 0 to m parameters for this tool
+      ### From param_0 to param_m for parameters for this tool
 #     param_0:
-        # Name must be determined from the workflow file
+        ### Name must be determined from the workflow file
 #       name: <some_name>
 #       value: <some_value>

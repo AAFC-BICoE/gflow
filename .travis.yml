@@ -3,24 +3,12 @@ language: python
 python:
   - "2.7"
 env:
-#  - TOX_ENV=py34 GALAXY_VERSION=dev
-#  - TOX_ENV=py33 GALAXY_VERSION=dev
-#  - TOX_ENV=py27 GALAXY_VERSION=dev
-  - TOX_ENV=py27 GALAXY_VERSION=release_15.07
-#  - TOX_ENV=py27 GALAXY_VERSION=release_15.05
-#  - TOX_ENV=py27 GALAXY_VERSION=release_15.03
-#  - TOX_ENV=py27 GALAXY_VERSION=release_15.01
-#  - TOX_ENV=py27 GALAXY_VERSION=release_14.10
-#  - TOX_ENV=py27 GALAXY_VERSION=release_14.08
-#  - TOX_ENV=py27 GALAXY_VERSION=release_14.06
-#  - TOX_ENV=py27 GALAXY_VERSION=release_14.04
-#  - TOX_ENV=py27 GALAXY_VERSION=release_14.02
-#  - TOX_ENV=py26 GALAXY_VERSION=dev
+  - GALAXY_VERSION=release_15.07
 
 install:
   - pip install -r requirements.txt
   - python setup.py install
-  - cp run_galaxy.sh $HOME
+  - cp tests/run_galaxy.sh $HOME
 
 before_script:
   # Install Galaxy
@@ -54,7 +42,7 @@ before_script:
   - export GALAXY_URL=http://localhost:8080
   - GALAXY_USER=$USER
   - GALAXY_USER_PASSWD=`date --rfc-3339=ns | md5sum | cut -f 1 -d ' '`
-  - export GALAXY_API_KEY=`python $TRAVIS_BUILD_DIR/create_user_get_api_key.py $GALAXY_URL $GALAXY_MASTER_API_KEY $GALAXY_USER $GALAXY_USER_EMAIL $GALAXY_USER_PASSWD`
+  - export GALAXY_API_KEY=`python $TRAVIS_BUILD_DIR/tests/create_user_get_api_key.py $GALAXY_URL $GALAXY_MASTER_API_KEY $GALAXY_USER $GALAXY_USER_EMAIL $GALAXY_USER_PASSWD`
   - echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $GALAXY_API_KEY"
 
 script:

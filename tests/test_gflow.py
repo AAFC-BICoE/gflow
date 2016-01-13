@@ -49,8 +49,6 @@ class TestGFlow:
         assert gflow.workflow == "something"
 
     def test_import_workflow_from_file(self):
-        print os.environ['GALAXY_URL']
-        print os.environ['GALAXY_API_KEY']
         workflow = self.gflow.import_workflow(self.gi)
         assert workflow.name == "galaxy101-2015 (imported from API)"
         workflow.delete()
