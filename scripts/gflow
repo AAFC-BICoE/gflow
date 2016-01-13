@@ -3,13 +3,16 @@
 
 import argparse
 import sys
+import logging
+import logging.config
+
 from gflow.GalaxyCMDWorkflow import GalaxyCMDWorkflow
 from yaml import parser
 
+logging.config.fileConfig('logging.ini')
+
 
 TEMP_WF = False
-TEMP_LIB = False
-VERBOSE = False
 
 
 def parse_options():
@@ -23,21 +26,20 @@ def parse_options():
     parser.add_argument("configfile", type=str,
                         help="config file with parameters")
     parser.add_argument('-w', "--tempwf", action="store_true",
-                        help="do not save imported workflow to Galaxy")
-    parser.add_argument("-l", "--templib", action="store_true",
-                        help="do not save imported library to Galaxy")
+                        help="do not save imported workflow from file to Galaxy")
     parser.add_argument("-v", "--verbose", action="store_true",
                         help="increase output verbosity")
     args = parser.parse_args()
     if args.tempwf:
         global TEMP_WF
         TEMP_WF = True
-    if args.templib:
-        global TEMP_LIB
-        TEMP_LIB = True
     if args.verbose:
-        global VERBOSE
-        VERBOSE = True
+        logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        ch_formatter = logging.Formatter('%(name)s - %(levelname)s: %(message)s')
+        ch.setFormatter(ch_formatter)
+        logger.addHandler(ch)
     return args.configfile
 
 
@@ -62,9 +64,9 @@ def main():
     try:
         gflow = GalaxyCMDWorkflow.init_from_config_file(configfile)
     except (ValueError, RuntimeError, KeyError, parser.ParserError):
-        sys.exit(1)
+       sys.exit(1)
     try:
-        gflow.run(TEMP_WF, TEMP_LIB)
+        gflow.run(TEMP_WF)
     except (ValueError, RuntimeError, KeyError):
         sys.exit(1)
     except IOError:
