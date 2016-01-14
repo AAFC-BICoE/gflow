@@ -34,7 +34,7 @@ Tests
 -----
 
 A small number of data files and workflow files have been included in ``data/`` and ``workflow/`` for testing purposes.
-Execute the tests with:
+After setting the ```GALAXY_URL``` and ```GALAXY_API_KEY``` environment variables, execute the tests with:
 
     $ py.test
     
