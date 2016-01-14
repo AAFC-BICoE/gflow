@@ -6,26 +6,26 @@ This is a command line interface application that allows datasets and a workflow
 Installation
 ------------
 
-Installation right from the source tree:
+From the source directory:
 
     $ pip install -r requirements.txt
-    $ pip install .
+    $ python setup.py install
 
 Configuration
 -------------
 
-Make a copy of the sample file in ``config/`` and configure the parameters in it as desired:
+Make a copy of the sample config file in ``config/`` and set the parameters in it as desired:
 
     $ cp config/config.yml.sample config/config.yml
 
 Usage
 -----
 
-Then, execute the ``gflow`` command:
+Then, execute:
 
     $ gflow config/config.yml
 
-Or, if running from the source directory without having installed the tool:
+Or, if executing from the source directory without having installed the tool:
 
     $ export PYTHONPATH=$PYTHONPATH:$PWD
     $ ./scripts/gflow config/config.yml
