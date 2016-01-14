@@ -1,4 +1,5 @@
 import os
+import json
 import pytest
 import bioblend.galaxy.objects.galaxy_instance as galaxy_instance
 
@@ -13,9 +14,11 @@ class TestGFlow:
         self.gflow = GalaxyCMDWorkflow.init_from_params(galaxy_url, galaxy_key, "Test History", "local",
                                                    "workflows/galaxy101.ga")
         self.gi = galaxy_instance.GalaxyInstance(self.gflow.galaxy_url, self.gflow.galaxy_key)
+        self.history = self.gi.histories.create(self.gflow.history_name)
 
     def teardown_class(self):
         self.gflow = None
+        self.history.delete(purge=True)
 
     def test_config_file_missing_required_parameter_is_rejected(self, tmpdir):
         p = tmpdir.mkdir("sub").join("tmp_config.yml")
@@ -53,7 +56,7 @@ class TestGFlow:
         assert workflow.name == "galaxy101-2015 (imported from API)"
         workflow.delete()
 
-    def test_import_id_workflow_from_id(self):
+    def test_import_workflow_from_id(self):
         workflow = self.gflow.import_workflow(self.gi)
         self.gflow.workflow_source = 'id'
         self.gflow.workflow = workflow.id
@@ -62,7 +65,7 @@ class TestGFlow:
         workflow.delete()
         workflow_copy.delete()
 
-    def test_import_workflow_bad_source(self):
+    def test_import_workflow_from_bad_source(self):
         self.gflow.workflow_source = "wrong"
         with pytest.raises(ValueError) as excinfo:
             self.gflow.import_workflow(self.gi)
@@ -79,11 +82,9 @@ class TestGFlow:
         datasets = dict()
         datasets[0] = {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'}
         self.gflow.datasets = datasets
-        history = self.gi.histories.create(self.gflow.history_name)
-        imported = self.gflow.import_datasets('datasets', self.gi, history)
+        imported = self.gflow.import_datasets('datasets', self.gi, self.history)
         assert len(imported) == 1
         assert imported[0].name == 'exons.bed'
-        history.delete(purge=True)
 
     def test_import_dataset_from_library(self):
         library = self.gi.libraries.create('Test Library')
@@ -91,9 +92,127 @@ class TestGFlow:
         id = library.dataset_ids[0]
         self.gflow.datasets[0] = {'source': 'library', 'dataset_id': id, 'library_id': library.id,
                                   'input_label': 'Exons'}
-        history = self.gi.histories.create(self.gflow.history_name)
-        imported = self.gflow.import_datasets('datasets', self.gi, history)
+        imported = self.gflow.import_datasets('datasets', self.gi, self.history)
         assert len(imported) == 1
         assert imported[0].name == 'Pasted Entry'
-        history.delete(purge=True)
         library.delete()
+
+    def test_import_dataset_from_incorrect_source(self):
+        datasets = dict()
+        datasets[0] = {'source': 'wrong', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'}
+        self.gflow.datasets = datasets
+        with pytest.raises(ValueError) as excinfo:
+            self.gflow.import_datasets('datasets', self.gi, self.history)
+        assert "Dataset source must be either 'local' or 'library'" in str(excinfo.value)
+
+    def test_create_dataset_collection_list(self):
+        self.gflow.dataset_collection = {
+            'intput_label': 'label',
+            'type': 'list',
+            'datasets': {
+                0: {
+                    'source': 'local',
+                    'dataset_file': 'data/exons.bed',
+                },
+                1: {
+                    'source': 'local',
+                    'dataset_file': 'data/SNPs.bed'
+                }
+            }
+        }
+        dataset_collection = self.gflow.create_dataset_collection(self.gi, self.history, 'DatasetList')
+        assert dataset_collection.name == 'DatasetList'
+        assert dataset_collection.collection_type == 'list'
+        elements = dataset_collection.elements
+        assert len(elements) == 2
+        assert elements[0]['object']['name'] == 'exons.bed'
+        assert elements[1]['object']['name'] == 'SNPs.bed'
+
+    def test_create_paired_dataset_collection(self):
+        self.gflow.dataset_collection = {
+            'intput_label': 'label',
+            'type': 'list:paired',
+            'datasets': {
+                0: {
+                    'source': 'local',
+                    'dataset_file': 'data/exons.bed',
+                },
+                1: {
+                    'source': 'local',
+                    'dataset_file': 'data/SNPs.bed'
+                }
+            }
+        }
+        dataset_collection = self.gflow.create_dataset_collection(self.gi, self.history, 'DatasetList')
+        assert dataset_collection.name == 'DatasetList'
+        assert dataset_collection.collection_type == 'list:paired'
+        elements = dataset_collection.elements
+        assert len(elements) == 1
+        assert elements[0]['object']['elements'][0]['object']['name'] == 'exons.bed'
+        assert elements[0]['object']['elements'][1]['object']['name'] == 'SNPs.bed'
+
+    def test_create_dataset_collection_wrong_type(self):
+        self.gflow.dataset_collection = {
+            'intput_label': 'label',
+            'type': 'wrong',
+            'datasets': {}
+        }
+        with pytest.raises(ValueError) as excinfo:
+            self.gflow.create_dataset_collection(self.gi, self.history, 'DatasetList')
+        assert "Dataset collection type must be 'list' or 'list:paired'" in excinfo.value
+
+    def test_create_paired_dataset_collection_with_wrong_amount(self):
+        self.gflow.dataset_collection = {
+            'intput_label': 'label',
+            'type': 'list:paired',
+            'datasets': {
+                0: {
+                    'source': 'local',
+                    'dataset_file': 'data/exons.bed',
+                }
+            }
+        }
+        with pytest.raises(RuntimeError) as excinfo:
+            self.gflow.create_dataset_collection(self.gi, self.history, 'DatasetList')
+        assert "An even number of datasets is required for a paired dataset collection" in excinfo.value
+
+    def test_verify_runtime_parameters(self):
+        with open('workflows/galaxy101.ga') as json_file:
+            wf_dict = json.load(json_file)
+        workflow = self.gi.workflows.import_new(wf_dict)
+        self.gflow.runtime_params = {}
+        missing_param = self.gflow.verify_runtime_params(workflow)
+        assert missing_param == ['lineNum']
+        workflow.delete()
+
+    def test_set_correct_runtime_params(self):
+        with open('workflows/galaxy101.ga') as json_file:
+            wf_dict = json.load(json_file)
+        workflow = self.gi.workflows.import_new(wf_dict)
+        self.gflow.runtime_params = {
+            'tool_0': {
+                'param_0': {
+                    'name': 'lineNum',
+                    'value': '10'
+                }
+            }
+        }
+        params = self.gflow.set_runtime_params(workflow)
+        assert params.values()[0] == {'lineNum': '10'}
+        workflow.delete()
+
+    def test_set_incorrect_runtime_params(self):
+        with open('workflows/galaxy101.ga') as json_file:
+            wf_dict = json.load(json_file)
+        workflow = self.gi.workflows.import_new(wf_dict)
+        self.gflow.runtime_params = {
+            'tool_0': {
+                'param_0': {
+                    'name': 'wrong_name',
+                    'value': '10'
+                }
+            }
+        }
+        params = self.gflow.set_runtime_params(workflow)
+        assert params == {}
+        workflow.delete()
