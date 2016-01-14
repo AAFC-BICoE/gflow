@@ -36,12 +36,8 @@ Tests
 A small number of data files and workflow files have been included in ``data/`` and ``workflow/`` for testing purposes.
 Execute the tests with:
 
-    $ py.test tests
+    $ py.test
     
 Run the tests without having installed the tool, requirements still need to be installed though:
 
     $ python setup.py test
-
-Generate a code coverage report:
-
-    $ py.test --cov gflow
