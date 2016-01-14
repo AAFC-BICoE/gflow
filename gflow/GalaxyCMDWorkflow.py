@@ -241,11 +241,29 @@ class GalaxyCMDWorkflow(object):
         self.logger.info("Dataset collection name: '%s'", name)
         collection_elements = []
         datasets = self.import_datasets('dataset_collection', gi, outputhist)
-        for i in range(0, len(datasets)):
-            collection_elements.append(collections.HistoryDatasetElement(name=datasets[i].name,
-                                                                         id=datasets[i].id))
+        if self.dataset_collection['type'] == 'list':
+            for i in range(0, len(datasets)):
+                collection_elements.append(collections.HistoryDatasetElement(name=datasets[i].name, id=datasets[i].id))
+        if self.dataset_collection['type'] == 'list:paired':
+            if len(datasets) % 2 != 0:
+                self.logger.error('An even number of datasets is required for a paired dataset collection')
+                raise RuntimeError('An even number of datasets is required for a paired dataset collection')
+            pair_num = 1
+            for i in range(0, len(datasets), 2):
+                collection_elements.append(
+                    collections.CollectionElement(
+                        name=datasets[i].name,
+                        type='paired',
+                        elements=[
+                            collections.HistoryDatasetElement(name='forward', id=datasets[i].id),
+                            collections.HistoryDatasetElement(name='reverse', id=datasets[i+1].id),
+                        ]
+                    )
+                )
+                pair_num += 1
         collection_description = collections.CollectionDescription(
                 name=name,
+                type='list:paired',
                 elements=collection_elements
             )
         dataset_collection = outputhist.create_dataset_collection(collection_description)
