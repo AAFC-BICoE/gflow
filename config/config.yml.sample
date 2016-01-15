@@ -22,6 +22,8 @@ history_name: <history_name>
 
 # dataset_collection:
 #   input_label: <some_label>
+    ### type must be 'list' or 'list:paired', for the latter an even number of datasets is expected
+#   type: list
 #   datasets:
 #     0:
 #       source: library
