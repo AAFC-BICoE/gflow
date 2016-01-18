@@ -7,6 +7,8 @@ env:
 
 install:
   - pip install -r requirements.txt
+  - git clone https://github.com/galaxyproject/bioblend.git ../bioblend
+  - pip install ../bioblend/
   - python setup.py install
   - cp tests/run_galaxy.sh $HOME
 
