@@ -67,12 +67,8 @@ class GalaxyCMDWorkflow(object):
         """
         cls.logger = logging.getLogger('gflow.GalaxyCMDWorkflow')
         cls.logger.info("Reading configuration file")
-        try:
-            with open(configfile, "r") as ymlfile:
-                config = yaml.load(ymlfile)
-        except parser.ParserError:
-            cls.logger.error("Incorrect yaml syntax in config file")
-            raise parser.ParserError
+        with open(configfile, "r") as ymlfile:
+            config = yaml.load(ymlfile)
         try:
             missing_var = GalaxyCMDWorkflow.verify_config_file(config)
             if missing_var:
@@ -178,12 +174,13 @@ class GalaxyCMDWorkflow(object):
         Returns:
             results (List): List of datasets imported into the history
         """
-        if data_group_type is 'datasets':
+        if data_group_type == 'datasets':
             datasets = self.datasets
-        elif data_group_type is 'dataset_collection':
+        elif data_group_type == 'dataset_collection':
             datasets = self.dataset_collection['datasets']
         else:
-            datasets = None
+            self.logger.error("Data group type must be 'datasets' or 'dataset_collection'")
+            raise ValueError("Data group type must be 'datasets' or 'dataset_collection'")
         results = []
         for i in range(0, len(datasets)):
             if datasets[i]['source'] == 'local':
@@ -191,8 +188,8 @@ class GalaxyCMDWorkflow(object):
                 try:
                     results.append(history.upload_dataset(datasets[i]['dataset_file']))
                 except IOError as e:
-                    self.logger.error(e)
-                    raise IOError
+                    self.logger.error("Dataset file '%s' does not exist" % datasets[i]['dataset_file'])
+                    raise IOError("Dataset file '%s' does not exist" % datasets[i]['dataset_file'])
             elif datasets[i]['source'] == 'library':
                 self.logger.info("Importing dataset: '%s' from library: '%s'" % (datasets[i]['dataset_id'],
                                   datasets[i]['library_id']))
@@ -217,8 +214,12 @@ class GalaxyCMDWorkflow(object):
         for i in range(0, len(self.runtime_params)):
             param_dict = {}
             for j in range(0, len(self.runtime_params['tool_' + str(i)])):
-                param_dict[self.runtime_params['tool_' + str(i)]['param_' + str(j)]['name']] \
-                    = self.runtime_params['tool_' + str(i)]['param_' + str(j)]['value']
+                try:
+                    param_dict[self.runtime_params['tool_' + str(i)]['param_' + str(j)]['name']] \
+                        = self.runtime_params['tool_' + str(i)]['param_' + str(j)]['value']
+                except KeyError as e:
+                    self.logger.error("Missing value for %s key in runtime parameters" % e)
+                    raise KeyError("Missing value for %s key in runtime parameters" % e)
                 for s in wf.sorted_step_ids():
                     try:
                         if wf.steps[s].tool_inputs[self.runtime_params['tool_' + str(i)]['param_' + str(j)]['name']]:
@@ -245,9 +246,6 @@ class GalaxyCMDWorkflow(object):
             for i in range(0, len(datasets)):
                 collection_elements.append(collections.HistoryDatasetElement(name=datasets[i].name, id=datasets[i].id))
         elif self.dataset_collection['type'] == 'list:paired':
-            if len(datasets) % 2 != 0:
-                self.logger.error("An even number of datasets is required for a paired dataset collection")
-                raise RuntimeError("An even number of datasets is required for a paired dataset collection")
             pair_num = 1
             for i in range(0, len(datasets), 2):
                 collection_elements.append(
@@ -272,7 +270,7 @@ class GalaxyCMDWorkflow(object):
         dataset_collection = outputhist.create_dataset_collection(collection_description)
         return dataset_collection
 
-    def run(self, temp_wf):
+    def run(self, temp_wf=False):
         """
         Make the connection, set up for the workflow, then run it
 
@@ -293,7 +291,7 @@ class GalaxyCMDWorkflow(object):
         self.logger.info("Creating output history '%s'" % self.history_name)
         outputhist = gi.histories.create(self.history_name)
 
-        input_map = {}
+        input_map = dict()
         if self.dataset_collection:
             self.logger.info("Creating dataset collection")
             dataset_collection = self.create_dataset_collection(gi, outputhist)
@@ -309,17 +307,13 @@ class GalaxyCMDWorkflow(object):
         if self.library_name:
             self.logger.info("Creating library '%s'" % self.library_name)
             lib = gi.libraries.create(self.library_name)
-            self.logger("Copying datasets to library '%s'" % self.library_name)
+            self.logger.info("Copying datasets to library '%s'" % self.library_name)
             for data in outputhist.get_datasets():
                 lib.copy_from_dataset(data)
 
         if self.runtime_params:
             self.logger.info("Setting runtime tool parameters")
-            try:
-                params = self.set_runtime_params(workflow)
-            except KeyError as e:
-                self.logger.error("Missing value for required parameter '%s'" % e)
-                raise KeyError("Missing value for required parameter '%s'" % e)
+            params = self.set_runtime_params(workflow)
             self.logger.info("Initiating workflow")
             results = workflow.run(input_map, outputhist, params)
         else:
@@ -331,7 +325,7 @@ class GalaxyCMDWorkflow(object):
             self.logger.info("Initiating workflow")
             results = workflow.run(input_map, outputhist)
 
-        if temp_wf and self.workflow_source is not 'id':
+        if temp_wf and self.workflow_source != 'id':
             self.logger.info("Deleting workflow: '%s'" % self.workflow)
             workflow.delete()
 
