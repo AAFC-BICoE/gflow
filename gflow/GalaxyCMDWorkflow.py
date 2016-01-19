@@ -130,6 +130,7 @@ class GalaxyCMDWorkflow(object):
             Name of parameter if runtime parameter is required, None otherwise
         """
         for step in workflow.sorted_step_ids():
+            print workflow
             values = workflow.steps[step].tool_inputs.viewvalues()
             for i in values:
                 if isinstance(i, dict):
