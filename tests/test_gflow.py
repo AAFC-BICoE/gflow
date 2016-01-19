@@ -185,7 +185,8 @@ def test_create_dataset_collection_wrong_type(gflow, gi):
 def test_verify_runtime_parameters(gflow, gi):
     workflow = gflow.import_workflow(gi)
     missing_param = gflow.verify_runtime_params(workflow)
-    assert missing_param == ['lineNum']
+    # assert missing_param == ['lineNum']
+    assert 0
     workflow.delete()
 
 def test_verify_no_runtime_params(gflow, gi):
