@@ -1,8 +1,7 @@
 sudo: false
 language: python
 python:
-  - "2.7"
-  - "3.2"
+  - "2.7.10"
 env:
   - GALAXY_VERSION=release_15.10
 
