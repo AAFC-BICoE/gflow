@@ -1,5 +1,7 @@
 sudo: false
 language: python
+os:
+  - osx
 python:
   - "2.7.10"
 env:
