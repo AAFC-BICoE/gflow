@@ -1,16 +1,12 @@
 sudo: false
 language: python
-os:
-  - osx
 python:
-  - "2.7.10"
+  - "2.7"
 env:
   - GALAXY_VERSION=release_15.10
 
 install:
   - pip install -r requirements.txt
-  - git clone https://github.com/galaxyproject/bioblend.git ../bioblend
-  - pip install ../bioblend/
   - python setup.py install
   - cp tests/run_galaxy.sh $HOME
 
@@ -50,5 +46,4 @@ before_script:
   - echo "Created new Galaxy user $GALAXY_USER with email $GALAXY_USER_EMAIL , password $GALAXY_USER_PASSWD and API key $GALAXY_API_KEY"
 
 script:
-  # Run nosetests through setuptools, so it will install test dependencies
-  - cd $TRAVIS_BUILD_DIR && py.test
+  - cd $TRAVIS_BUILD_DIR && python setup.py test

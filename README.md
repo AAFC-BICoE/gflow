@@ -9,7 +9,7 @@ Installation
 From the source directory:
 
     $ pip install -r requirements.txt
-    $ python setup.py install
+    $ python setup.py install 
 
 Configuration
 -------------
@@ -35,9 +35,5 @@ Tests
 
 A small number of data files and workflow files have been included in ``data/`` and ``workflow/`` for testing purposes.
 After setting the ```GALAXY_URL``` and ```GALAXY_API_KEY``` environment variables, execute the tests with:
-
-    $ py.test
-    
-Run the tests without having installed the tool, requirements still need to be installed though:
 
     $ python setup.py test

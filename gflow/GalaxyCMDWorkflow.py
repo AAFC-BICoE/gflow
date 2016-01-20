@@ -2,7 +2,6 @@ import json
 import logging
 import yaml
 
-from yaml import parser
 from bioblend.galaxy.objects import GalaxyInstance
 from bioblend.galaxy import dataset_collections as collections
 
@@ -130,8 +129,6 @@ class GalaxyCMDWorkflow(object):
             Name of parameter if runtime parameter is required, None otherwise
         """
         for step in workflow.sorted_step_ids():
-            print workflow
-            print workflow.steps[step].tool_inputs.viewvalues()
             values = workflow.steps[step].tool_inputs.viewvalues()
             for i in values:
                 if isinstance(i, dict):
