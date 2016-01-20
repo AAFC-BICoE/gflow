@@ -1,3 +1,1 @@
-bioblend
-pyyaml
-pytest-cov
+git+https://github.com/galaxyproject/bioblend.git@46923dceb705f98f44bc0ab5801017d4a13faeaa
