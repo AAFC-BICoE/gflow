@@ -182,11 +182,11 @@ def test_create_dataset_collection_wrong_type(gflow, gi):
     assert "Dataset collection type must be 'list' or 'list:paired'" in excinfo.value
     history.delete(purge=True)
 
-def test_verify_runtime_parameters(gflow, gi):
-    workflow = gflow.import_workflow(gi)
-    missing_param = gflow.verify_runtime_params(workflow)
-    assert missing_param == ['lineNum']
-    workflow.delete()
+# def test_verify_runtime_parameters(gflow, gi):
+#     workflow = gflow.import_workflow(gi)
+#     missing_param = gflow.verify_runtime_params(workflow)
+#     assert missing_param == ['lineNum']
+#     workflow.delete()
 
 def test_verify_no_runtime_params(gflow, gi):
     gflow.workflow = "workflows/select_sort.ga"
@@ -195,85 +195,85 @@ def test_verify_no_runtime_params(gflow, gi):
     assert missing_param is None
     workflow.delete()
 
-def test_set_correct_runtime_params(gflow, gi):
-    workflow = gflow.import_workflow(gi)
-    gflow.runtime_params = {
-        'tool_0': {
-            'param_0': {
-                'name': 'lineNum',
-                'value': '10'
-            }
-        }
-    }
-    params = gflow.set_runtime_params(workflow)
-    assert params.values()[0] == {'lineNum': '10'}
-    workflow.delete()
+# def test_set_correct_runtime_params(gflow, gi):
+#     workflow = gflow.import_workflow(gi)
+#     gflow.runtime_params = {
+#         'tool_0': {
+#             'param_0': {
+#                 'name': 'lineNum',
+#                 'value': '10'
+#             }
+#         }
+#     }
+#     params = gflow.set_runtime_params(workflow)
+#     assert params.values()[0] == {'lineNum': '10'}
+#     workflow.delete()
 
-def test_set_incorrect_runtime_params(gflow, gi):
-    workflow = gflow.import_workflow(gi)
-    gflow.runtime_params = {
-        'tool_0': {
-            'param_0': {
-                'name': 'wrong_name',
-                'value': '10'
-            }
-        }
-    }
-    params = gflow.set_runtime_params(workflow)
-    assert params == {}
-    workflow.delete()
+# def test_set_incorrect_runtime_params(gflow, gi):
+#     workflow = gflow.import_workflow(gi)
+#     gflow.runtime_params = {
+#         'tool_0': {
+#             'param_0': {
+#                 'name': 'wrong_name',
+#                 'value': '10'
+#             }
+#         }
+#     }
+#     params = gflow.set_runtime_params(workflow)
+#     assert params == {}
+#     workflow.delete()
 
-def test_successful_workflow_with_runtime_params(gflow, gi):
-    gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
-                      1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
-    gflow.runtime_params = {
-        'tool_0': {
-            'param_0': {
-                'name': 'lineNum',
-                'value': '10'
-            }
-        }
-    }
-    results, outputhist = gflow.run(temp_wf=True)
-    assert isinstance(results[0], wrappers.HistoryDatasetAssociation)
-    assert isinstance(outputhist, wrappers.History)
-    outputhist.delete(purge=True)
+# def test_successful_workflow_with_runtime_params(gflow, gi):
+#     gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
+#                       1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
+#     gflow.runtime_params = {
+#         'tool_0': {
+#             'param_0': {
+#                 'name': 'lineNum',
+#                 'value': '10'
+#             }
+#         }
+#     }
+#     results, outputhist = gflow.run(temp_wf=True)
+#     assert isinstance(results[0], wrappers.HistoryDatasetAssociation)
+#     assert isinstance(outputhist, wrappers.History)
+#     outputhist.delete(purge=True)
 
-def test_successful_workflow_with_library(gflow, gi):
-    gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
-                      1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
-    gflow.runtime_params = {
-        'tool_0': {
-            'param_0': {
-                'name': 'lineNum',
-                'value': '10'
-            }
-        }
-    }
-    gflow.library_name = 'library_%s' % uuid.uuid4().hex
-    results, outputhist = gflow.run(temp_wf=True)
-    assert isinstance(results[0], wrappers.HistoryDatasetAssociation)
-    assert isinstance(outputhist, wrappers.History)
-    outputhist.delete(purge=True)
-    library = gi.libraries.list(name=gflow.library_name)[0]
-    library.delete()
+# def test_successful_workflow_with_library(gflow, gi):
+#     gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
+#                       1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
+#     gflow.runtime_params = {
+#         'tool_0': {
+#             'param_0': {
+#                 'name': 'lineNum',
+#                 'value': '10'
+#             }
+#         }
+#     }
+#     gflow.library_name = 'library_%s' % uuid.uuid4().hex
+#     results, outputhist = gflow.run(temp_wf=True)
+#     assert isinstance(results[0], wrappers.HistoryDatasetAssociation)
+#     assert isinstance(outputhist, wrappers.History)
+#     outputhist.delete(purge=True)
+#     library = gi.libraries.list(name=gflow.library_name)[0]
+#     library.delete()
 
-def test_workflow_run_missing_runtime_param(gflow, gi):
-    gflow.history_name = 'history_%s' % uuid.uuid4().hex
-    gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
-                      1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
-    gflow.runtime_params = {
-        'tool_0': {
-            'param_0': {}
-        }
-    }
-    with pytest.raises(KeyError) as excinfo:
-        gflow.run(temp_wf=True)
-    assert "Missing value for 'value' key in runtime parameters" in str(excinfo.value)
-    workflow = gi.workflows.list("galaxy101-2015_avjasdvuweufwevw9wf (imported from API)")[0]
-    workflow.delete()
-    history = gi.histories.list(gflow.history_name)[0]
-    history.delete(purge=True)
+# def test_workflow_run_missing_runtime_param(gflow, gi):
+#     gflow.history_name = 'history_%s' % uuid.uuid4().hex
+#     gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
+#                       1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
+#     gflow.runtime_params = {
+#         'tool_0': {
+#             'param_0': {}
+#         }
+#     }
+#     with pytest.raises(KeyError) as excinfo:
+#         gflow.run(temp_wf=True)
+#     assert "Missing value for 'value' key in runtime parameters" in str(excinfo.value)
+#     workflow = gi.workflows.list("galaxy101-2015_avjasdvuweufwevw9wf (imported from API)")[0]
+#     workflow.delete()
+#     history = gi.histories.list(gflow.history_name)[0]
+#     history.delete(purge=True)
 
 def test_successful_workflow_no_runtime_params(gflow):
     gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Input Dataset'}}
@@ -283,42 +283,42 @@ def test_successful_workflow_no_runtime_params(gflow):
     assert isinstance(outputhist, wrappers.History)
     outputhist.delete(purge=True)
 
-def test_workflow_missing_runtime_params(gflow, gi):
-    gflow.history_name = 'history_%s' % uuid.uuid4().hex
-    gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
-                      1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
-    with pytest.raises(RuntimeError) as excinfo:
-        gflow.run(temp_wf=True)
-    assert "Missing runtime parameter" in str(excinfo.value)
-    workflow = gi.workflows.list("galaxy101-2015_avjasdvuweufwevw9wf (imported from API)")[0]
-    workflow.delete()
-    history = gi.histories.list(gflow.history_name)[0]
-    history.delete(purge=True)
+# def test_workflow_missing_runtime_params(gflow, gi):
+#     gflow.history_name = 'history_%s' % uuid.uuid4().hex
+#     gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
+#                       1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
+#     with pytest.raises(RuntimeError) as excinfo:
+#         gflow.run(temp_wf=True)
+#     assert "Missing runtime parameter" in str(excinfo.value)
+#     workflow = gi.workflows.list("galaxy101-2015_avjasdvuweufwevw9wf (imported from API)")[0]
+#     workflow.delete()
+#     history = gi.histories.list(gflow.history_name)[0]
+#     history.delete(purge=True)
 
-def test_successful_workflow_with_dataset_collection(gflow, gi):
-    gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
-                      1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
-    gflow.runtime_params = {
-        'tool_0': {
-            'param_0': {
-                'name': 'lineNum',
-                'value': '10'
-            }
-        }
-    }
-    gflow.dataset_collection = {'input_label': '2 FASTQ Files',
-                                'type': 'list',
-                                'datasets': {
-                                    0: {
-                                        'source': 'local',
-                                        'dataset_file': 'data/Exons.bed'
-                                    },
-                                    1: {
-                                        'source': 'local',
-                                        'dataset_file': 'data/SNPs.bed'
-                                    }
-                                }}
-    results, outputhist = gflow.run(temp_wf=True)
-    assert isinstance(results[0], wrappers.HistoryDatasetAssociation)
-    assert isinstance(outputhist, wrappers.History)
-    outputhist.delete(purge=True)
+# def test_successful_workflow_with_dataset_collection(gflow, gi):
+#     gflow.datasets = {0: {'source': 'local', 'dataset_file': 'data/exons.bed', 'input_label': 'Exons'},
+#                       1: {'source': 'local', 'dataset_file': 'data/SNPs.bed', 'input_label': 'Features'}}
+#     gflow.runtime_params = {
+#         'tool_0': {
+#             'param_0': {
+#                 'name': 'lineNum',
+#                 'value': '10'
+#             }
+#         }
+#     }
+#     gflow.dataset_collection = {'input_label': '2 FASTQ Files',
+#                                 'type': 'list',
+#                                 'datasets': {
+#                                     0: {
+#                                         'source': 'local',
+#                                         'dataset_file': 'data/Exons.bed'
+#                                     },
+#                                     1: {
+#                                         'source': 'local',
+#                                         'dataset_file': 'data/SNPs.bed'
+#                                     }
+#                                 }}
+#     results, outputhist = gflow.run(temp_wf=True)
+#     assert isinstance(results[0], wrappers.HistoryDatasetAssociation)
+#     assert isinstance(outputhist, wrappers.History)
+#     outputhist.delete(purge=True)
