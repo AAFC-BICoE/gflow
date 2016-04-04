@@ -269,7 +269,7 @@ class GalaxyCMDWorkflow(object):
         dataset_collection = outputhist.create_dataset_collection(collection_description)
         return dataset_collection
 
-    def run(self, temp_wf=False):
+    def run(self, temp_wf=False, output_file=None):
         """
         Make the connection, set up for the workflow, then run it
 
@@ -323,6 +323,10 @@ class GalaxyCMDWorkflow(object):
                 raise RuntimeError("Missing runtime parameter for '%s'" % str(missing_param))
             self.logger.info("Initiating workflow")
             results = workflow.run(input_map, outputhist)
+            if output_file:
+                f = open(output_file, 'w')
+                f.write(str(results))
+                f.close()
 
         if temp_wf and self.workflow_source != 'id':
             self.logger.info("Deleting workflow: '%s'" % self.workflow)
