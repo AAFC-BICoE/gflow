@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/AAFC-MBB/GFlow.svg?branch=master)](https://travis-ci.org/AAFC-MBB/GFlow)
+[![Build Status](https://travis-ci.org/AAFC-MBB/gflow.svg?branch=master)](https://travis-ci.org/AAFC-MBB/GFlow)
 GFlow
 ========================
 
